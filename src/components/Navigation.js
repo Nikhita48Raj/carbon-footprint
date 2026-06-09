@@ -9,7 +9,10 @@ import {
   BookOpen, 
   Calculator, 
   PieChart, 
-  MessageSquare
+  MessageSquare,
+  Home,
+  Users,
+  Leaf
 } from 'lucide-react';
 import styles from './Navigation.module.css';
 
@@ -21,12 +24,15 @@ export default function Navigation() {
   const links = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/tracking', label: 'Track Log', icon: Activity },
+    { href: '/smart-home', label: 'Smart Home', icon: Home },
+    { href: '/digital-twin', label: 'Digital Twin', icon: Users },
+    { href: '/offsets', label: 'Offsets', icon: Leaf },
     { href: '/goals', label: 'Goals', icon: Target },
     { href: '/insights', label: 'Insights', icon: Lightbulb },
     { href: '/simulator', label: 'Simulator', icon: Calculator },
     { href: '/reports', label: 'Reports', icon: PieChart },
     { href: '/education', label: 'Learn', icon: BookOpen },
-    { href: '/coach', label: 'AI Coach', icon: MessageSquare },
+    { href: '/coach', label: 'AI Advisor', icon: MessageSquare },
   ];
 
   return (

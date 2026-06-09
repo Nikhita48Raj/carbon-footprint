@@ -1,7 +1,19 @@
+"use client";
 import styles from "./page.module.css";
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
+  const [liveEmissions, setLiveEmissions] = useState(3.81052);
+
+  // Simulate real-time ticking meter
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveEmissions(prev => prev + 0.00001);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -15,9 +27,22 @@ export default function Dashboard() {
       </header>
 
       <div className={styles.grid}>
+        {/* Real-Time Meter (NEW) */}
+        <section className={`glass-panel ${styles.fullWidthCard}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(90deg, rgba(16,185,129,0.1), rgba(59,130,246,0.1))' }}>
+          <div>
+            <h2 style={{color: 'var(--primary)'}}>Real-Time Carbon Footprint Meter</h2>
+            <p style={{color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem'}}>Live estimate based on your active smart devices and baseline habits.</p>
+          </div>
+          <div style={{textAlign: 'right'}}>
+            <div style={{fontFamily: 'monospace', fontSize: '3.5rem', fontWeight: 'bold', color: 'var(--foreground)'}}>
+              {liveEmissions.toFixed(5)} <span style={{fontSize: '1.2rem', color: 'rgba(255,255,255,0.5)'}}>Tons CO₂e</span>
+            </div>
+          </div>
+        </section>
+
         {/* Total Footprint */}
         <section className={`glass-panel ${styles.mainCard}`}>
-          <h2>Your Total Carbon Footprint</h2>
+          <h2>Your Annual Baseline</h2>
           <div className={styles.footprintValue}>
             <span className="heading-lg">3.8</span>
             <span className={styles.unit}>Tons CO₂e / Year</span>
@@ -46,31 +71,6 @@ export default function Dashboard() {
               <div className={styles.barContainer}><div className={styles.bar} style={{width: '10%', background: '#3b82f6'}}></div></div>
             </li>
           </ul>
-        </section>
-
-        {/* Actions / Recommendations */}
-        <section className={`glass-panel ${styles.fullWidthCard}`}>
-          <div className={styles.actionHeader}>
-            <h2>AI Sustainability Coach</h2>
-            <button className="btn-primary" style={{padding: '0.5rem 1rem', fontSize: '0.875rem'}}>Log Activity</button>
-          </div>
-          <div className={styles.recommendations}>
-            <div className={styles.recCard}>
-              <h3>Opt for Public Transit</h3>
-              <p>Taking the bus twice a week could save 120kg CO₂e.</p>
-              <span className={styles.impactHigh}>High Impact</span>
-            </div>
-            <div className={styles.recCard}>
-              <h3>Meatless Monday</h3>
-              <p>Skip meat one day a week to reduce food footprint by 10%.</p>
-              <span className={styles.impactMedium}>Medium Impact</span>
-            </div>
-            <div className={styles.recCard}>
-              <h3>LED Upgrade</h3>
-              <p>Replace 5 bulbs to save energy costs.</p>
-              <span className={styles.impactLow}>Low Impact</span>
-            </div>
-          </div>
         </section>
       </div>
     </div>
