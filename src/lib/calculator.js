@@ -1,4 +1,5 @@
 import { EMISSION_FACTORS } from './emissionFactors';
+import { getGridFactors } from './gridFactors';
 
 /**
  * Core Carbon Calculation Engine
@@ -112,9 +113,14 @@ export function getRealtimeTickRate(annualKg) {
 export function calculateCategoryBaseline(profile, category) {
   const { householdSize = 1, diet = 'avg_meat', transportMode = 'car_petrol', energySource = 'grid' } = profile || {};
 
+  const gridInfo = getGridFactors(profile?.country, profile?.location);
+
   if (category === 'transport') {
     const commuteKmPerYear = 30 * 250;
-    const transportFactor = EMISSION_FACTORS.transport[transportMode] ?? EMISSION_FACTORS.transport.car_petrol;
+    let transportFactor = EMISSION_FACTORS.transport[transportMode] ?? EMISSION_FACTORS.transport.car_petrol;
+    if (transportMode.startsWith('car')) {
+      transportFactor = transportFactor * gridInfo.transitCarFactor;
+    }
     return roundTo4(transportFactor * commuteKmPerYear);
   }
 
@@ -123,7 +129,7 @@ export function calculateCategoryBaseline(profile, category) {
       ? EMISSION_FACTORS.energy.electricity_solar
       : energySource === 'wind'
       ? EMISSION_FACTORS.energy.electricity_wind
-      : EMISSION_FACTORS.energy.electricity_grid;
+      : gridInfo.electricity;
 
     return roundTo4(
       electricityFactor * (3100 / householdSize) +

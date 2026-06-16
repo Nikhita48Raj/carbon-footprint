@@ -4,7 +4,8 @@ import { authOptions } from '@/lib/authOptions';
 import connectDB from '@/lib/db';
 import User from '@/models/User';
 import ActivityLog from '@/models/ActivityLog';
-import { buildCategorySummary, calculateCategoryBaseline } from '@/lib/calculator';
+import { buildCategorySummary, calculateCategoryBaseline, computeActivityEmission } from '@/lib/calculator';
+import Goal from '@/models/Goal';
 
 export async function POST(request) {
   try {
@@ -62,12 +63,12 @@ Here is their real carbon profile:
 - Commuting Transport Mode: ${transportMode.replace('_', ' ')}
 - Home Energy Source: ${energySource}
 
-Answer the user concisely and directly. Suggest actionable, realistic modifications. Keep tone positive, scientific, and motivating.`;
+Answer the user concisely and directly. Suggest actionable, realistic modifications. Keep tone positive, scientific, and motivating.
+You have tools available to help the user directly: 'log_activity' and 'create_goal'. If the user requests to track, log, or set a goal, use these tools.`;
 
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (apiKey) {
-      // Send to real Gemini API
       let promptText = '';
       if (action === 'generateWeeklyPlan') {
         promptText = `${systemPrompt}\n\nTask: Generate a personalized 7-day Weekly Action Plan focusing on their biggest driver: ${highestCategory || 'general'}. List 3 high-impact specific actions for this week. Include brief rationales.`;
@@ -75,20 +76,133 @@ Answer the user concisely and directly. Suggest actionable, realistic modificati
         promptText = `${systemPrompt}\n\nUser Question: ${message}\n\nResponse:`;
       }
 
+      const toolsDefinition = [
+        {
+          functionDeclarations: [
+            {
+              name: "log_activity",
+              description: "Logs a user activity (e.g. food consumption, transport travel, home energy use) to the database.",
+              parameters: {
+                type: "OBJECT",
+                properties: {
+                  category: {
+                    type: "STRING",
+                    enum: ["transport", "energy", "food", "shopping", "waste"]
+                  },
+                  subType: {
+                    type: "STRING",
+                    description: "The specific type, e.g. car_petrol, flight_short, meal_vegan, electricity_grid, general_waste_kg"
+                  },
+                  amount: {
+                    type: "NUMBER",
+                    description: "Numerical quantity of activity"
+                  },
+                  unit: {
+                    type: "STRING",
+                    description: "Unit (e.g., km, kWh, meals, kg, litres)"
+                  },
+                  notes: {
+                    type: "STRING",
+                    description: "Additional text context"
+                  }
+                },
+                required: ["category", "subType", "amount", "unit"]
+              }
+            },
+            {
+              name: "create_goal",
+              description: "Creates a carbon reduction goal for the user.",
+              parameters: {
+                type: "OBJECT",
+                properties: {
+                  title: { type: "STRING" },
+                  type: {
+                    type: "STRING",
+                    enum: ["category_limit", "reduction_percentage", "streak"]
+                  },
+                  category: {
+                    type: "STRING",
+                    enum: ["overall", "transport", "energy", "food", "shopping", "waste"]
+                  },
+                  targetValue: { type: "NUMBER" },
+                  targetUnit: { type: "STRING" },
+                  endDate: {
+                    type: "STRING",
+                    description: "ISO date string of target goal end date"
+                  }
+                },
+                required: ["title", "type", "targetValue", "targetUnit", "endDate"]
+              }
+            }
+          ]
+        }
+      ];
+
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }]
+            contents: [{ parts: [{ text: promptText }] }],
+            tools: toolsDefinition
           })
         }
       );
 
       if (response.ok) {
         const data = await response.json();
-        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const candidate = data.candidates?.[0];
+        const part = candidate?.content?.parts?.[0];
+
+        // Check for function calls
+        if (part?.functionCall) {
+          const { name, args } = part.functionCall;
+          if (name === 'log_activity') {
+            const co2e = computeActivityEmission({
+              category: args.category,
+              subType: args.subType,
+              amount: args.amount
+            });
+            const newLog = await ActivityLog.create({
+              userId: session.user.id,
+              category: args.category,
+              subType: args.subType,
+              amount: args.amount,
+              unit: args.unit,
+              co2e,
+              notes: args.notes || 'Logged via AI Agent',
+            });
+            return NextResponse.json({
+              text: `✅ **AI Action Activated**: Logged your **${args.subType.replace(/_/g, ' ')}** activity of **${args.amount} ${args.unit}** (${co2e.toFixed(3)} kg CO₂e recorded).`,
+              actionTaken: true
+            }, { status: 200 });
+          }
+
+          if (name === 'create_goal') {
+            const newGoal = await Goal.create({
+              userId: session.user.id,
+              title: args.title,
+              type: args.type,
+              category: args.category || 'overall',
+              targetValue: args.targetValue,
+              targetUnit: args.targetUnit,
+              endDate: new Date(args.endDate),
+              milestones: [
+                { at: 25, label: 'Quarter way there! 🌱' },
+                { at: 50, label: 'Halfway to your goal! 🌿' },
+                { at: 75, label: 'Three quarters done! 🌳' },
+                { at: 100, label: 'Goal Achieved! 🏆' },
+              ],
+            });
+            return NextResponse.json({
+              text: `✅ **AI Action Activated**: Created your new carbon reduction goal: **"${args.title}"** (Target: ${args.targetValue} ${args.targetUnit} by ${new Date(args.endDate).toLocaleDateString()}).`,
+              actionTaken: true
+            }, { status: 200 });
+          }
+        }
+
+        const responseText = part?.text;
         if (responseText) {
           return NextResponse.json({ text: responseText.trim() }, { status: 200 });
         }

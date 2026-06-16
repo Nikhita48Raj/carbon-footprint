@@ -10,14 +10,28 @@ import {
   LineElement, ArcElement, Title, Tooltip, Legend, Filler,
 } from 'chart.js';
 import { getRealtimeTickRate } from '@/lib/calculator';
+import DigitalTwin from '@/components/DigitalTwin';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler);
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { dashboardData, dashboardLoading, fetchDashboard, realtimeKgCO2e, setRealtimeKgCO2e } = useStore();
+  const { dashboardData, dashboardLoading, fetchDashboard, realtimeKgCO2e, setRealtimeKgCO2e, goals, fetchGoals, showToast } = useStore();
   const tickRef = useRef(null);
+
+  const handleResetDemo = async () => {
+    try {
+      const res = await fetch('/api/demo', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Demo reset failed');
+      showToast('Demo data seeded successfully! Log in as demo@ecotrack.org / password123');
+      fetchDashboard();
+      fetchGoals();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
 
   // Auth guard
   useEffect(() => {
@@ -26,7 +40,10 @@ export default function Dashboard() {
 
   // Fetch dashboard data on mount
   useEffect(() => {
-    if (status === 'authenticated') fetchDashboard();
+    if (status === 'authenticated') {
+      fetchDashboard();
+      fetchGoals();
+    }
   }, [status]);
 
   // Real-time ticker
@@ -97,9 +114,18 @@ export default function Dashboard() {
           <h1 className={styles.greeting}>Welcome back, {userName.split(' ')[0]}</h1>
           <p className={styles.level}>Level {gamification.level ?? 1} · {gamification.streakDays ?? 0} Day Streak 🔥</p>
         </div>
-        <div className={styles.streak}>
-          <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }}>Total Points</span>
-          <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)' }}>{gamification.totalPoints ?? 0} pts</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            onClick={handleResetDemo}
+            className="btn-secondary"
+            style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', border: '1px solid var(--primary)', color: 'var(--primary)', background: 'transparent', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            🔄 Reset Demo Mode
+          </button>
+          <div className={styles.streak}>
+            <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }}>Total Points</span>
+            <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)' }}>{gamification.totalPoints ?? 0} pts</span>
+          </div>
         </div>
       </header>
 
@@ -115,6 +141,16 @@ export default function Dashboard() {
           </div>
           <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>kg CO₂e this year</div>
         </div>
+      </section>
+
+      {/* Digital Twin Section */}
+      <section className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--primary)', marginBottom: '1rem', width: '100%', textAlign: 'left' }}>🌍 Your SVG Digital Twin</h2>
+        <DigitalTwin 
+          co2e={summary.total} 
+          energySource={dashboardData?.user?.profile?.energySource || 'grid'} 
+          goalsCompleted={goals?.filter(g => g.status === 'completed').length || 0}
+        />
       </section>
 
       {summary.total === 0 && (

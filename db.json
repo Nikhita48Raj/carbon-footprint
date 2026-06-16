@@ -26,6 +26,37 @@
       },
       "createdAt": "2026-06-16T16:54:16.280Z",
       "updatedAt": "2026-06-16T16:54:16.280Z"
+    },
+    {
+      "_id": "s9x69ac",
+      "name": "Demo User",
+      "email": "demo@ecotrack.org",
+      "password": "$2b$10$jXGxI80n4xP1.0Lr1uez3OV3WS99mnNcEeiqQQb8OImd63aJ8jN0O",
+      "profile": {
+        "location": "London",
+        "country": "United Kingdom",
+        "householdSize": 2,
+        "diet": "avg_meat",
+        "transportMode": "car_hybrid",
+        "energySource": "mixed",
+        "onboardingComplete": true
+      },
+      "baseline": {
+        "annualKgCO2e": 5419.142,
+        "calculatedAt": "2026-06-16T17:25:45.821Z"
+      },
+      "gamification": {
+        "level": 3,
+        "streakDays": 5,
+        "totalPoints": 1250,
+        "badges": [
+          "First Step",
+          "Green Energy",
+          "Commute Hero"
+        ]
+      },
+      "createdAt": "2026-06-16T17:25:45.819Z",
+      "updatedAt": "2026-06-16T17:25:45.821Z"
     }
   ],
   "activities": [
@@ -42,7 +73,263 @@
       "loggedAt": "2026-06-16T17:13:27.093Z",
       "createdAt": "2026-06-16T17:13:27.093Z",
       "updatedAt": "2026-06-16T17:13:27.093Z"
+    },
+    {
+      "_id": "r6botg7",
+      "userId": "s9x69ac",
+      "category": "transport",
+      "subType": "train",
+      "amount": 45,
+      "unit": "km",
+      "co2e": 1.6,
+      "notes": "Commute to office",
+      "loggedAt": "2026-06-16T17:25:45.822Z",
+      "createdAt": "2026-06-16T17:25:45.822Z",
+      "updatedAt": "2026-06-16T17:25:45.822Z"
+    },
+    {
+      "_id": "w6csdw0",
+      "userId": "s9x69ac",
+      "category": "transport",
+      "subType": "car_hybrid",
+      "amount": 20,
+      "unit": "km",
+      "co2e": 2.1,
+      "notes": "Grocery shopping",
+      "loggedAt": "2026-06-16T17:25:45.824Z",
+      "createdAt": "2026-06-16T17:25:45.824Z",
+      "updatedAt": "2026-06-16T17:25:45.824Z"
+    },
+    {
+      "_id": "kzp5yqe",
+      "userId": "s9x69ac",
+      "category": "energy",
+      "subType": "electricity_grid",
+      "amount": 12,
+      "unit": "kWh",
+      "co2e": 2.8,
+      "notes": "Daily home run",
+      "loggedAt": "2026-06-16T17:25:45.825Z",
+      "createdAt": "2026-06-16T17:25:45.825Z",
+      "updatedAt": "2026-06-16T17:25:45.825Z"
+    },
+    {
+      "_id": "rz972s4",
+      "userId": "s9x69ac",
+      "category": "food",
+      "subType": "meal_avg_meat",
+      "amount": 2,
+      "unit": "meals",
+      "co2e": 5,
+      "notes": "Lunch and dinner",
+      "loggedAt": "2026-06-16T17:25:45.826Z",
+      "createdAt": "2026-06-16T17:25:45.826Z",
+      "updatedAt": "2026-06-16T17:25:45.826Z"
+    },
+    {
+      "_id": "ng8g8et",
+      "userId": "s9x69ac",
+      "category": "food",
+      "subType": "meal_vegan",
+      "amount": 1,
+      "unit": "meals",
+      "co2e": 0.5,
+      "notes": "Breakfast toast",
+      "loggedAt": "2026-06-16T17:25:45.827Z",
+      "createdAt": "2026-06-16T17:25:45.827Z",
+      "updatedAt": "2026-06-16T17:25:45.827Z"
+    },
+    {
+      "_id": "kd9179n",
+      "userId": "s9x69ac",
+      "category": "waste",
+      "subType": "general_waste_kg",
+      "amount": 4.5,
+      "unit": "kg",
+      "co2e": 2.6,
+      "notes": "Weekly bin empty",
+      "loggedAt": "2026-06-16T17:25:45.828Z",
+      "createdAt": "2026-06-16T17:25:45.829Z",
+      "updatedAt": "2026-06-16T17:25:45.829Z"
+    },
+    {
+      "_id": "wt7mdv5",
+      "userId": "s9x69ac",
+      "category": "waste",
+      "subType": "recycled_kg",
+      "amount": 3,
+      "unit": "kg",
+      "co2e": -0.63,
+      "notes": "Sorted plastics/glass",
+      "loggedAt": "2026-06-16T17:25:45.830Z",
+      "createdAt": "2026-06-16T17:25:45.830Z",
+      "updatedAt": "2026-06-16T17:25:45.830Z"
+    },
+    {
+      "_id": "fiaiw1w",
+      "userId": "s9x69ac",
+      "category": "shopping",
+      "subType": "clothing_sustainable",
+      "amount": 1,
+      "unit": "units",
+      "co2e": 5,
+      "notes": "Thrift shop jacket",
+      "loggedAt": "2026-06-16T17:25:45.831Z",
+      "createdAt": "2026-06-16T17:25:45.831Z",
+      "updatedAt": "2026-06-16T17:25:45.831Z"
+    },
+    {
+      "_id": "cbug57z",
+      "userId": "s9x69ac",
+      "category": "transport",
+      "subType": "bus",
+      "amount": 8,
+      "unit": "km",
+      "co2e": 0.7,
+      "notes": "Evening trip",
+      "loggedAt": "2026-06-16T17:25:45.832Z",
+      "createdAt": "2026-06-16T17:25:45.832Z",
+      "updatedAt": "2026-06-16T17:25:45.832Z"
+    },
+    {
+      "_id": "d3yhcpe",
+      "userId": "s9x69ac",
+      "category": "food",
+      "subType": "meal_vegetarian",
+      "amount": 1,
+      "unit": "meals",
+      "co2e": 0.8,
+      "notes": "Vegetarian dinner",
+      "loggedAt": "2026-06-16T17:25:45.833Z",
+      "createdAt": "2026-06-16T17:25:45.833Z",
+      "updatedAt": "2026-06-16T17:25:45.833Z"
+    },
+    {
+      "_id": "3cd4ka1",
+      "userId": "s9x69ac",
+      "category": "transport",
+      "subType": "train",
+      "amount": 45,
+      "unit": "km",
+      "co2e": 1.6,
+      "notes": "Commute to office",
+      "loggedAt": "2026-06-16T17:25:45.834Z",
+      "createdAt": "2026-06-16T17:25:45.834Z",
+      "updatedAt": "2026-06-16T17:25:45.834Z"
+    },
+    {
+      "_id": "2kl7ly0",
+      "userId": "s9x69ac",
+      "category": "transport",
+      "subType": "car_hybrid",
+      "amount": 20,
+      "unit": "km",
+      "co2e": 2.1,
+      "notes": "Grocery shopping",
+      "loggedAt": "2026-06-16T17:25:45.836Z",
+      "createdAt": "2026-06-16T17:25:45.836Z",
+      "updatedAt": "2026-06-16T17:25:45.836Z"
+    },
+    {
+      "_id": "7ad4y5k",
+      "userId": "s9x69ac",
+      "category": "energy",
+      "subType": "electricity_grid",
+      "amount": 12,
+      "unit": "kWh",
+      "co2e": 2.8,
+      "notes": "Daily home run",
+      "loggedAt": "2026-06-16T17:25:45.837Z",
+      "createdAt": "2026-06-16T17:25:45.837Z",
+      "updatedAt": "2026-06-16T17:25:45.837Z"
+    },
+    {
+      "_id": "xwqscxr",
+      "userId": "s9x69ac",
+      "category": "food",
+      "subType": "meal_avg_meat",
+      "amount": 2,
+      "unit": "meals",
+      "co2e": 5,
+      "notes": "Lunch and dinner",
+      "loggedAt": "2026-06-16T17:25:45.838Z",
+      "createdAt": "2026-06-16T17:25:45.838Z",
+      "updatedAt": "2026-06-16T17:25:45.838Z"
+    },
+    {
+      "_id": "2lmw16v",
+      "userId": "s9x69ac",
+      "category": "food",
+      "subType": "meal_vegan",
+      "amount": 1,
+      "unit": "meals",
+      "co2e": 0.5,
+      "notes": "Breakfast toast",
+      "loggedAt": "2026-06-16T17:25:45.839Z",
+      "createdAt": "2026-06-16T17:25:45.839Z",
+      "updatedAt": "2026-06-16T17:25:45.839Z"
     }
   ],
-  "goals": []
+  "goals": [
+    {
+      "_id": "cbo69o5",
+      "userId": "s9x69ac",
+      "title": "Ditch the Petrol Car",
+      "description": "Use trains or buses for commutes this week",
+      "type": "reduction_percentage",
+      "category": "transport",
+      "targetValue": 20,
+      "targetUnit": "%",
+      "currentValue": 25,
+      "status": "completed",
+      "startDate": "2026-06-06T17:25:45.822Z",
+      "endDate": "2026-06-13T17:25:45.822Z",
+      "completedAt": "2026-06-12T17:25:45.822Z",
+      "milestones": [
+        {
+          "at": 25,
+          "label": "Started strong! 🌱",
+          "reached": true,
+          "reachedAt": "2026-06-16T17:25:45.840Z"
+        },
+        {
+          "at": 100,
+          "label": "Goal Achieved! 🏆",
+          "reached": true,
+          "reachedAt": "2026-06-16T17:25:45.840Z"
+        }
+      ],
+      "createdAt": "2026-06-16T17:25:45.840Z",
+      "updatedAt": "2026-06-16T17:25:45.840Z"
+    },
+    {
+      "_id": "ao0hxnm",
+      "userId": "s9x69ac",
+      "title": "Low Carbon Energy Week",
+      "description": "Limit grid electricity consumption",
+      "type": "category_limit",
+      "category": "energy",
+      "targetValue": 50,
+      "targetUnit": "kWh",
+      "currentValue": 12,
+      "status": "active",
+      "startDate": "2026-06-14T17:25:45.822Z",
+      "endDate": "2026-06-21T17:25:45.822Z",
+      "milestones": [
+        {
+          "at": 25,
+          "label": "Started strong! 🌱",
+          "reached": true,
+          "reachedAt": "2026-06-16T17:25:45.841Z"
+        },
+        {
+          "at": 100,
+          "label": "Goal Achieved! 🏆",
+          "reached": false
+        }
+      ],
+      "createdAt": "2026-06-16T17:25:45.842Z",
+      "updatedAt": "2026-06-16T17:25:45.842Z"
+    }
+  ]
 }

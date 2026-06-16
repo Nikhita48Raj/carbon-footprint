@@ -102,6 +102,7 @@ export async function GET() {
         name: user.name,
         gamification: user.gamification,
         baseline: user.baseline,
+        profile: user.profile,
       },
     });
   } catch (error) {
