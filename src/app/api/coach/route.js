@@ -6,6 +6,7 @@ import User from '@/models/User';
 import ActivityLog from '@/models/ActivityLog';
 import { buildCategorySummary, calculateCategoryBaseline, computeActivityEmission } from '@/lib/calculator';
 import Goal from '@/models/Goal';
+import { getGridCarbonIntensity } from '@/lib/gridFactors';
 
 export async function POST(request) {
   try {
@@ -52,6 +53,17 @@ export async function POST(request) {
     const transportMode = user.profile?.transportMode || 'car_petrol';
     const energySource = user.profile?.energySource || 'grid';
 
+    // Fetch live grid carbon intensity for richer AI advice
+    let gridIntensityGperKwh = 233; // default gCO2/kWh
+    let gridStatus = 'moderate';
+    let gridSource = 'fallback';
+    try {
+      const gridData = await getGridCarbonIntensity(user.profile?.country, user.profile?.location);
+      gridIntensityGperKwh = Math.round(gridData.intensity * 1000);
+      gridStatus = gridData.status;
+      gridSource = gridData.source;
+    } catch { /* non-critical */ }
+
     // System prompt with user context
     const systemPrompt = `You are a Principal Climate-Tech Expert and AI Sustainability Coach. 
 You are advising ${user.name}.
@@ -62,6 +74,7 @@ Here is their real carbon profile:
 - Diet Preference: ${diet.replace('_', ' ')}
 - Commuting Transport Mode: ${transportMode.replace('_', ' ')}
 - Home Energy Source: ${energySource}
+- Live Grid Carbon Intensity: ${gridIntensityGperKwh} gCO2/kWh (${gridStatus}${gridSource === 'live' ? ', LIVE from National Grid API' : ', regional estimate'})
 
 Answer the user concisely and directly. Suggest actionable, realistic modifications. Keep tone positive, scientific, and motivating.
 You have tools available to help the user directly: 'log_activity' and 'create_goal'. If the user requests to track, log, or set a goal, use these tools.`;
@@ -248,7 +261,7 @@ You have tools available to help the user directly: 'log_activity' and 'create_g
       } else if (query.includes('car') || query.includes('drive') || query.includes('commute') || query.includes('transport') || query.includes('flight')) {
         replyText = `Hello! Your primary transport mode is set to ${transportMode.replace('_', ' ')}. Transport is a massive carbon driver. If you commute via car, sharing rides or shifting to trains/buses (which emit up to 80% less per passenger-km) will dramatically lower your monthly ${monthlyTotal.toFixed(1)} kg footprint.`;
       } else if (query.includes('electricity') || query.includes('energy') || query.includes('heating') || query.includes('gas')) {
-        replyText = `Hi! You are currently using ${energySource} energy. Home energy is highly grid-dependent. Since your grid electricity factor is 0.233 kg CO₂e per kWh, adjusting your thermostat, improving insulation, or switching to solar arrays can reduce your footprint significantly.`;
+        replyText = `Hi! You are currently using ${energySource} energy. Home energy is highly grid-dependent. Your grid is currently running at **${gridIntensityGperKwh} gCO₂/kWh** (${gridStatus}${gridSource === 'live' ? ' — live National Grid data' : ''}). ${gridStatus === 'low' || gridStatus === 'very low' ? 'Great news — now is a good time to run high-energy appliances!' : gridStatus === 'high' || gridStatus === 'very high' ? 'The grid is carbon-intensive right now — try to defer high-energy tasks.' : 'The grid is at moderate intensity.'} Switching to solar arrays can reduce your footprint significantly.`;
       } else if (query.includes('hello') || query.includes('hi ') || query.includes('hey')) {
         replyText = `Hello ${user.name}! I am your AI Advisor. Looking at your profile, your annual carbon baseline is estimated at ${baseline.toFixed(0)} kg CO₂e, and your highest emission driver is ${highestCategory !== 'None' ? highestCategory : 'yet to be logged'}. Ask me how you can optimize your diet, energy, or transport!`;
       } else {

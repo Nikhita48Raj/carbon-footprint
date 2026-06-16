@@ -1,14 +1,23 @@
 import React from 'react';
 
-export default function DigitalTwin({ co2e = 0, energySource = 'grid', goalsCompleted = 0 }) {
+export default function DigitalTwin({ co2e = 0, energySource = 'grid', goalsCompleted = 0, gridStatus = null, gridIntensity = null, gridSource = null }) {
   // Determine severity based on carbon footprint score
   // Low: < 200 kg CO2e/month, Medium: 200 - 500, High: > 500
   const isLow = co2e < 200;
   const isHigh = co2e >= 500;
   const isMedium = !isLow && !isHigh;
 
-  // Environmental colors
+  // Grid status flags (from live National Grid API)
+  const gridStatusLower = (gridStatus ?? '').toLowerCase();
+  const gridIsClean = gridStatusLower === 'low' || gridStatusLower === 'very low';
+  const gridIsDirty = gridStatusLower === 'high' || gridStatusLower === 'very high';
+  const gridBadgeColor = gridIsClean ? '#10b981' : gridIsDirty ? '#ef4444' : '#f59e0b';
+  const gridIcon = gridIsClean ? '🟢' : gridIsDirty ? '🔴' : '🟡';
+
+  // Environmental colors — additionally tinted by live grid status
   const skyColor = isLow ? '#a5f3fc' : isMedium ? '#fed7aa' : '#9ca3af';
+  // If grid is very dirty, push the sky slightly more polluted-looking
+  const effectiveSkyColor = gridIsDirty && !isLow ? '#8d9199' : skyColor;
   const groundColor = isLow ? '#10b981' : isMedium ? '#f59e0b' : '#b45309';
   const foliageColor = isLow ? '#047857' : isMedium ? '#d97706' : '#78350f';
   const cloudColor = isLow ? 'white' : isMedium ? 'rgba(255,255,255,0.7)' : 'rgba(75,85,99,0.8)';
@@ -19,7 +28,7 @@ export default function DigitalTwin({ co2e = 0, energySource = 'grid', goalsComp
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%' }}>
-      <div style={{ position: 'relative', width: '100%', maxWidth: '400px', aspectRatio: '4/3', borderRadius: '12px', overflow: 'hidden', background: skyColor, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)' }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: '400px', aspectRatio: '4/3', borderRadius: '12px', overflow: 'hidden', background: effectiveSkyColor, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)' }}>
         
         {/* SVG Drawing Canvas */}
         <svg viewBox="0 0 400 300" width="100%" height="100%" style={{ transition: 'all 0.5s ease' }}>
@@ -42,6 +51,10 @@ export default function DigitalTwin({ co2e = 0, energySource = 'grid', goalsComp
               <path d="M120 110 a15 15 0 0 1 20 -5 a20 20 0 0 1 30 0 a15 15 0 0 1 10 10 z" fill="#4b5563" opacity="0.6" />
               <path d="M280 90 a15 15 0 0 1 20 -5 a20 20 0 0 1 30 0 a15 15 0 0 1 10 10 z" fill="#374151" opacity="0.5" />
             </>
+          )}
+          {/* Extra smog if grid is dirty regardless of personal score */}
+          {gridIsDirty && !isHigh && (
+            <path d="M200 95 a12 12 0 0 1 18 -4 a18 18 0 0 1 28 0 a12 12 0 0 1 8 8 z" fill="#6b7280" opacity="0.35" />
           )}
 
           {/* Island Ground */}
@@ -136,10 +149,23 @@ export default function DigitalTwin({ co2e = 0, energySource = 'grid', goalsComp
           )}
         </svg>
 
-        {/* Dynamic HUD Overlay */}
-        <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '10px', display: 'flex', justifyContent: 'space-between', background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', color: 'white' }}>
-          <span>Twin Status: <strong>{isLow ? 'ECO-HERO 🌱' : isMedium ? 'BALANCED ⚖️' : 'HEAVY LOAD ⚠️'}</strong></span>
-          <span>Monthly: <strong>{co2e.toFixed(0)} kg</strong></span>
+        {/* Dynamic HUD Overlay — two rows */}
+        <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '10px', background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', color: 'white' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: gridStatus ? '4px' : 0 }}>
+            <span>Twin Status: <strong>{isLow ? 'ECO-HERO 🌱' : isMedium ? 'BALANCED ⚖️' : 'HEAVY LOAD ⚠️'}</strong></span>
+            <span>Monthly: <strong>{co2e.toFixed(0)} kg</strong></span>
+          </div>
+          {/* Live grid row — only shown when API data is present */}
+          {gridStatus && gridIntensity != null && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '4px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+              <span style={{ color: gridBadgeColor, fontWeight: 600 }}>
+                {gridIcon} Grid: {gridStatus} · {(gridIntensity * 1000).toFixed(0)} gCO₂/kWh
+              </span>
+              <span style={{ opacity: 0.55, fontSize: '0.7rem', alignSelf: 'center' }}>
+                {gridSource === 'live' ? '● LIVE' : '◌ fallback'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

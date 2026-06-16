@@ -10,6 +10,7 @@ export default function DigitalTwin() {
 
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [liveGridIntensity, setLiveGridIntensity] = useState(0.23314); // default UK baseline
 
   // Sliders state
   const [carDays, setCarDays] = useState(5);
@@ -21,26 +22,30 @@ export default function DigitalTwin() {
   useEffect(() => {
     async function getProfile() {
       try {
-        const res = await fetch('/api/user/profile');
-        if (res.ok) {
-          const data = await res.json();
+        const [profileRes, dashRes] = await Promise.all([
+          fetch('/api/user/profile'),
+          fetch('/api/dashboard/summary'),
+        ]);
+        if (profileRes.ok) {
+          const data = await profileRes.json();
           setProfileData(data);
-          
           if (data.profile) {
-            // Match onboarding diet to default meals
             const diet = data.profile.diet;
             if (diet === 'vegan' || diet === 'vegetarian') setMeatMeals(0);
             else if (diet === 'pescatarian') setMeatMeals(3);
             else if (diet === 'avg_meat') setMeatMeals(10);
             else if (diet === 'high_meat') setMeatMeals(18);
-
-            // Match energy source
             const source = data.profile.energySource;
             if (source === 'solar' || source === 'wind') setSolarPct(80);
           }
         }
+        if (dashRes.ok) {
+          const dashData = await dashRes.json();
+          // Use live grid intensity if available (fallback to UK baseline)
+          if (dashData.gridIntensity) setLiveGridIntensity(dashData.gridIntensity);
+        }
       } catch (err) {
-        console.error('Error fetching profile for digital twin:', err);
+        console.error('Error fetching data for digital twin:', err);
       } finally {
         setLoading(false);
       }
@@ -64,9 +69,9 @@ export default function DigitalTwin() {
     }[transportMode] ?? 0.17049;
     const transport = Math.round(tFactor * 30 * 250);
 
-    // Energy Component
+    // Energy Component — uses live grid intensity from National Grid API
     const eSource = profile.energySource || 'grid';
-    const electricityFactor = eSource === 'solar' ? 0.041 : eSource === 'wind' ? 0.011 : 0.23314;
+    const electricityFactor = eSource === 'solar' ? 0.041 : eSource === 'wind' ? 0.011 : liveGridIntensity;
     const energy = Math.round(electricityFactor * (3100 / size) + 0.1828 * (12000 / size));
 
     // Food Component
@@ -166,7 +171,11 @@ export default function DigitalTwin() {
 
           <div className={styles.inputGroup}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label className={styles.label}>☀️ Clean Solar/Renewable Share</label>
+              <label className={styles.label}>☀️ Clean Solar/Renewable Share
+                <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', padding: '1px 5px', borderRadius: '999px', background: 'rgba(16,185,129,0.15)', color: 'var(--primary)', border: '1px solid rgba(16,185,129,0.3)', verticalAlign: 'middle' }}>
+                  Grid: {(liveGridIntensity * 1000).toFixed(0)} gCO₂/kWh
+                </span>
+              </label>
               <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{solarPct}%</span>
             </div>
             <input type="range" min="0" max="100" value={solarPct} onChange={e => setSolarPct(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--primary)' }} />

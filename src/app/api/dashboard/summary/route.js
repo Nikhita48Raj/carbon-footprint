@@ -6,6 +6,7 @@ import ActivityLog from '@/models/ActivityLog';
 import User from '@/models/User';
 import { buildCategorySummary, annualise, getRealtimeTickRate } from '@/lib/calculator';
 import { GLOBAL_AVERAGES } from '@/lib/emissionFactors';
+import { getGridCarbonIntensity } from '@/lib/gridFactors';
 
 // GET /api/dashboard/summary  — returns all data needed to populate the dashboard
 export async function GET() {
@@ -90,6 +91,8 @@ export async function GET() {
       target: GLOBAL_AVERAGES.target * 1000,
     };
 
+    const gridData = await getGridCarbonIntensity(user.profile?.country, user.profile?.location);
+
     return NextResponse.json({
       monthlySummary,
       prevMonthlySummary,
@@ -98,6 +101,10 @@ export async function GET() {
       annualProjection,
       tickRate,
       benchmarks,
+      gridIntensity: gridData.intensity,
+      gridStatus: gridData.status,
+      gridSource: gridData.source,
+      lastUpdated: new Date().toISOString(),
       user: {
         name: user.name,
         gamification: user.gamification,

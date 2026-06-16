@@ -330,6 +330,76 @@
       ],
       "createdAt": "2026-06-16T17:25:45.842Z",
       "updatedAt": "2026-06-16T17:25:45.842Z"
+    },
+    {
+      "_id": "4txfxv4",
+      "userId": "4g2s4f1",
+      "title": "Challenge: Switch to Solar Energy",
+      "description": "Install a rooftop solar array to offset 80% of your grid electricity usage.",
+      "type": "reduction_percentage",
+      "category": "energy",
+      "targetValue": 30,
+      "targetUnit": "percent",
+      "period": "monthly",
+      "endDate": "2026-07-16T00:00:00.000Z",
+      "milestones": [
+        {
+          "at": 25,
+          "label": "Quarter way there! 🌱"
+        },
+        {
+          "at": 50,
+          "label": "Halfway to your goal! 🌿"
+        },
+        {
+          "at": 75,
+          "label": "Three quarters done! 🌳"
+        },
+        {
+          "at": 100,
+          "label": "Goal Achieved! 🏆"
+        }
+      ],
+      "currentValue": 0,
+      "status": "active",
+      "startDate": "2026-06-16T17:27:28.066Z",
+      "createdAt": "2026-06-16T17:27:28.066Z",
+      "updatedAt": "2026-06-16T17:27:28.066Z"
+    },
+    {
+      "_id": "xszak4g",
+      "userId": "4g2s4f1",
+      "title": "Challenge: Switch to Solar Energy",
+      "description": "Install a rooftop solar array to offset 80% of your grid electricity usage.",
+      "type": "reduction_percentage",
+      "category": "energy",
+      "targetValue": 30,
+      "targetUnit": "percent",
+      "period": "monthly",
+      "endDate": "2026-07-16T00:00:00.000Z",
+      "milestones": [
+        {
+          "at": 25,
+          "label": "Quarter way there! 🌱"
+        },
+        {
+          "at": 50,
+          "label": "Halfway to your goal! 🌿"
+        },
+        {
+          "at": 75,
+          "label": "Three quarters done! 🌳"
+        },
+        {
+          "at": 100,
+          "label": "Goal Achieved! 🏆"
+        }
+      ],
+      "currentValue": 0,
+      "status": "active",
+      "startDate": "2026-06-16T17:27:29.784Z",
+      "createdAt": "2026-06-16T17:27:29.784Z",
+      "updatedAt": "2026-06-16T17:27:29.784Z"
     }
   ]
 }

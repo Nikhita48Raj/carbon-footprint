@@ -50,11 +50,15 @@ export function calculateWaste(wasteType, kg) {
 
 // ─── AGGREGATE ───────────────────────────────────────────────────────────────
 
-export function computeActivityEmission(activity) {
+export function computeActivityEmission(activity, liveGridIntensity) {
   const { category, subType, amount } = activity;
   switch (category) {
     case 'transport': return calculateTransport(subType, amount);
-    case 'energy':    return calculateEnergy(subType, amount);
+    case 'energy':    
+      if (subType === 'electricity_grid' && liveGridIntensity != null) {
+        return roundTo4(liveGridIntensity * amount);
+      }
+      return calculateEnergy(subType, amount);
     case 'food':      return calculateFood(subType, amount);
     case 'shopping':  return calculateShopping(subType, amount);
     case 'waste':     return calculateWaste(subType, amount);

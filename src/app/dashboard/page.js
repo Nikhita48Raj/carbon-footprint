@@ -46,10 +46,17 @@ export default function Dashboard() {
     }
   }, [status]);
 
-  // Real-time ticker
+  // Real-time ticker — velocity scales with live grid carbon intensity
   useEffect(() => {
     const annual = dashboardData?.annualProjection ?? 4200;
-    const tick = dashboardData?.tickRate ?? getRealtimeTickRate(annual);
+    const baseTick = dashboardData?.tickRate ?? getRealtimeTickRate(annual);
+
+    // Scale tick rate by live grid intensity vs. UK baseline (0.2331 kg/kWh)
+    // A greener grid (low intensity) slows the meter; a dirtier grid speeds it up
+    const UK_BASELINE_INTENSITY = 0.2331;
+    const liveIntensity = dashboardData?.gridIntensity ?? UK_BASELINE_INTENSITY;
+    const gridMultiplier = liveIntensity / UK_BASELINE_INTENSITY;
+    const tick = baseTick * gridMultiplier;
 
     // Seed the real-time meter at ~45% of the annual projection (mid-year estimate)
     setRealtimeKgCO2e(annual * 0.45);
@@ -134,6 +141,20 @@ export default function Dashboard() {
         <div>
           <h2 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--primary)', margin: 0 }}>⚡ Real-Time Carbon Meter</h2>
           <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>Live estimate · updates every 2 seconds</p>
+          {/* Live grid badge */}
+          {dashboardData?.gridStatus && (() => {
+            const s = dashboardData.gridStatus.toLowerCase();
+            const isLow = s === 'low' || s === 'very low';
+            const isHigh = s === 'high' || s === 'very high';
+            const badgeColor = isLow ? '#10b981' : isHigh ? '#ef4444' : '#f59e0b';
+            const icon = isLow ? '🟢' : isHigh ? '🔴' : '🟡';
+            return (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.4rem', padding: '2px 8px', borderRadius: '999px', background: `${badgeColor}22`, border: `1px solid ${badgeColor}44`, fontSize: '0.72rem', color: badgeColor, fontWeight: 600 }}>
+                {icon} Grid: {dashboardData.gridStatus} · {(dashboardData.gridIntensity * 1000).toFixed(0)} gCO₂/kWh
+                {dashboardData.gridSource === 'live' && <span style={{ opacity: 0.7 }}> · LIVE</span>}
+              </span>
+            );
+          })()}
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontFamily: 'monospace', fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-1px' }}>
@@ -145,11 +166,14 @@ export default function Dashboard() {
 
       {/* Digital Twin Section */}
       <section className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--primary)', marginBottom: '1rem', width: '100%', textAlign: 'left' }}>🌍 Your SVG Digital Twin</h2>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--primary)', marginBottom: '1rem', width: '100%', textAlign: 'left' }}>🌍 Your Digital Twin</h2>
         <DigitalTwin 
           co2e={summary.total} 
           energySource={dashboardData?.user?.profile?.energySource || 'grid'} 
           goalsCompleted={goals?.filter(g => g.status === 'completed').length || 0}
+          gridStatus={dashboardData?.gridStatus ?? null}
+          gridIntensity={dashboardData?.gridIntensity ?? null}
+          gridSource={dashboardData?.gridSource ?? null}
         />
       </section>
 

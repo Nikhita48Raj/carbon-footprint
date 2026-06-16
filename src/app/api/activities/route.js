@@ -6,6 +6,7 @@ import ActivityLog from '@/models/ActivityLog';
 import User from '@/models/User';
 import Goal from '@/models/Goal';
 import { computeActivityEmission, calculateCategoryBaseline } from '@/lib/calculator';
+import { getGridCarbonIntensity } from '@/lib/gridFactors';
 
 // GET /api/activities?period=month  — fetch logs for the current user
 export async function GET(request) {
@@ -63,8 +64,23 @@ export async function POST(request) {
       );
     }
 
+    // Fetch live grid intensity to improve electricity calculations accuracy
+    let liveGridIntensity = null;
+    if (category === 'energy' && subType === 'electricity_grid') {
+      try {
+        const userRecord = await User.findById(session.user.id);
+        const gridData = await getGridCarbonIntensity(
+          userRecord?.profile?.country,
+          userRecord?.profile?.location
+        );
+        liveGridIntensity = gridData.intensity;
+      } catch {
+        // Non-critical: fall back to static factor if this lookup fails
+      }
+    }
+
     // Calculate real CO₂e using the scientific calculation engine
-    const co2e = computeActivityEmission({ category, subType, amount });
+    const co2e = computeActivityEmission({ category, subType, amount }, liveGridIntensity);
 
     await connectDB();
 
