@@ -23,18 +23,18 @@ export default function Simulator() {
           <h2>Adjust Your Scenarios</h2>
           
           <div className={styles.inputGroup}>
-            <label className={styles.label}>Days commuting by car per week: {carDays}</label>
-            <input type="range" min="0" max="7" value={carDays} onChange={(e)=>setCarDays(e.target.value)} style={{width: '100%'}}/>
+            <label htmlFor="sim-car-days" className={styles.label}>Days commuting by car per week: {carDays}</label>
+            <input id="sim-car-days" type="range" min="0" max="7" value={carDays} onChange={(e)=>setCarDays(e.target.value)} aria-label="Days commuting by car per week" aria-valuemin="0" aria-valuemax="7" aria-valuenow={carDays} style={{width: '100%'}}/>
           </div>
 
           <div className={styles.inputGroup} style={{marginTop: '1rem'}}>
-            <label className={styles.label}>Meat-heavy meals per week: {meatMeals}</label>
-            <input type="range" min="0" max="21" value={meatMeals} onChange={(e)=>setMeatMeals(e.target.value)} style={{width: '100%'}}/>
+            <label htmlFor="sim-meat-meals" className={styles.label}>Meat-heavy meals per week: {meatMeals}</label>
+            <input id="sim-meat-meals" type="range" min="0" max="21" value={meatMeals} onChange={(e)=>setMeatMeals(e.target.value)} aria-label="Meat-heavy meals per week" aria-valuemin="0" aria-valuemax="21" aria-valuenow={meatMeals} style={{width: '100%'}}/>
           </div>
 
           <div className={styles.inputGroup} style={{marginTop: '1rem'}}>
-            <label className={styles.label}>Reduce home energy usage by (%): {energyReduction}%</label>
-            <input type="range" min="0" max="50" step="5" value={energyReduction} onChange={(e)=>setEnergyReduction(e.target.value)} style={{width: '100%'}}/>
+            <label htmlFor="sim-energy-red" className={styles.label}>Reduce home energy usage by (%): {energyReduction}%</label>
+            <input id="sim-energy-red" type="range" min="0" max="50" step="5" value={energyReduction} onChange={(e)=>setEnergyReduction(e.target.value)} aria-label="Reduce home energy usage percentage" aria-valuemin="0" aria-valuemax="50" aria-valuenow={energyReduction} style={{width: '100%'}}/>
           </div>
         </section>
 

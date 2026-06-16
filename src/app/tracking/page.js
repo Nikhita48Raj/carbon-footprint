@@ -77,6 +77,7 @@ export default function Tracking() {
   // Plate Scan State
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
+  const [inputFocused, setInputFocused] = useState(false);
 
   useEffect(() => {
     if (session) {
@@ -264,11 +265,36 @@ export default function Tracking() {
                 type="file"
                 accept="image/*"
                 onChange={handleImageScan}
-                style={{ display: 'none' }}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+                style={{
+                  position: 'absolute',
+                  width: '1px',
+                  height: '1px',
+                  padding: 0,
+                  margin: '-1px',
+                  overflow: 'hidden',
+                  clip: 'rect(0, 0, 0, 0)',
+                  whiteSpace: 'nowrap',
+                  border: 0,
+                }}
                 id="plate-scan-upload"
                 disabled={scanning || !session}
               />
-              <label htmlFor="plate-scan-upload" style={{ cursor: 'pointer', padding: '0.75rem 1.5rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '999px', fontSize: '0.9rem', fontWeight: '600', transition: 'background 0.2s' }}>
+              <label
+                htmlFor="plate-scan-upload"
+                style={{
+                  cursor: 'pointer',
+                  padding: '0.75rem 1.5rem',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: inputFocused ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '999px',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  transition: 'background 0.2s',
+                  outline: inputFocused ? '3px solid rgba(16,185,129,0.3)' : 'none'
+                }}
+              >
                 {scanning ? 'Analyzing Meal Photo...' : 'Upload Plate Image'}
               </label>
               {scanning && (

@@ -144,17 +144,22 @@ export default function Onboarding() {
           <div className={styles.stepContent}>
             <h2>Transportation 🚗</h2>
             <p className={styles.subtitle}>How do you mainly get around?</p>
-            <div className={styles.options}>
-              {TRANSPORT_OPTIONS.map(o => (
-                <button
-                  key={o.value}
-                  className={`${styles.optionCard} ${formData.transportMode === o.value ? styles.optionSelected : ''}`}
-                  onClick={() => update('transportMode', o.value)}
-                  type="button"
-                >
-                  {o.label}
-                </button>
-              ))}
+            <div className={styles.options} role="radiogroup" aria-label="Commuting transportation modes">
+              {TRANSPORT_OPTIONS.map(o => {
+                const isSelected = formData.transportMode === o.value;
+                return (
+                  <button
+                    key={o.value}
+                    role="radio"
+                    aria-checked={isSelected}
+                    className={`${styles.optionCard} ${isSelected ? styles.optionSelected : ''}`}
+                    onClick={() => update('transportMode', o.value)}
+                    type="button"
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -164,17 +169,22 @@ export default function Onboarding() {
           <div className={styles.stepContent}>
             <h2>Diet Preferences 🥗</h2>
             <p className={styles.subtitle}>Diet is one of the biggest factors in your footprint.</p>
-            <div className={styles.options}>
-              {DIET_OPTIONS.map(o => (
-                <button
-                  key={o.value}
-                  className={`${styles.optionCard} ${formData.diet === o.value ? styles.optionSelected : ''}`}
-                  onClick={() => update('diet', o.value)}
-                  type="button"
-                >
-                  {o.label}
-                </button>
-              ))}
+            <div className={styles.options} role="radiogroup" aria-label="Dietary preferences">
+              {DIET_OPTIONS.map(o => {
+                const isSelected = formData.diet === o.value;
+                return (
+                  <button
+                    key={o.value}
+                    role="radio"
+                    aria-checked={isSelected}
+                    className={`${styles.optionCard} ${isSelected ? styles.optionSelected : ''}`}
+                    onClick={() => update('diet', o.value)}
+                    type="button"
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -184,17 +194,22 @@ export default function Onboarding() {
           <div className={styles.stepContent}>
             <h2>Home Energy ⚡</h2>
             <p className={styles.subtitle}>What powers your home?</p>
-            <div className={styles.options}>
-              {ENERGY_OPTIONS.map(o => (
-                <button
-                  key={o.value}
-                  className={`${styles.optionCard} ${formData.energySource === o.value ? styles.optionSelected : ''}`}
-                  onClick={() => update('energySource', o.value)}
-                  type="button"
-                >
-                  {o.label}
-                </button>
-              ))}
+            <div className={styles.options} role="radiogroup" aria-label="Home energy sources">
+              {ENERGY_OPTIONS.map(o => {
+                const isSelected = formData.energySource === o.value;
+                return (
+                  <button
+                    key={o.value}
+                    role="radio"
+                    aria-checked={isSelected}
+                    className={`${styles.optionCard} ${isSelected ? styles.optionSelected : ''}`}
+                    onClick={() => update('energySource', o.value)}
+                    type="button"
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
             </div>
             {error && (
               <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', borderRadius: '8px', color: '#fca5a5', fontSize: '0.9rem' }}>

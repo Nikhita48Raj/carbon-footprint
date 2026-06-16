@@ -52,12 +52,25 @@ export default function Coach() {
     }
   };
 
-  const formatText = (text) => {
-    // Replace **text** with <strong>text</strong>
-    let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    // Replace bullet lists
-    html = html.replace(/^\*\s*(.*?)$/gm, '• $1');
-    return html;
+  const renderSafeMessage = (text) => {
+    const lines = text.split('\n');
+    return lines.map((line, lineIdx) => {
+      const isBullet = line.trim().startsWith('*');
+      const cleanLine = isBullet ? line.replace(/^\*\s*/, '• ') : line;
+      
+      const parts = cleanLine.split(/\*\*/g);
+      const elements = parts.map((part, partIdx) => {
+        if (partIdx % 2 === 1) {
+          return <strong key={partIdx}>{part}</strong>;
+        }
+        return part;
+      });
+      return (
+        <div key={lineIdx} style={{ minHeight: '1.2em' }}>
+          {elements}
+        </div>
+      );
+    });
   };
 
   return (
@@ -88,7 +101,8 @@ export default function Coach() {
               whiteSpace: 'pre-wrap',
               fontSize: '0.95rem',
               color: 'white'
-            }} dangerouslySetInnerHTML={{ __html: formatText(m.text) }}>
+            }}>
+              {renderSafeMessage(m.text)}
             </div>
           ))}
           {generating && (

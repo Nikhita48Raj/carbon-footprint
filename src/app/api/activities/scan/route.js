@@ -2,9 +2,15 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import { EMISSION_FACTORS } from '@/lib/emissionFactors';
+import { rateLimit } from '@/lib/rateLimiter';
 
 export async function POST(request) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    if (!rateLimit(ip, 5, 60000)) { // 5 scans per minute limit
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

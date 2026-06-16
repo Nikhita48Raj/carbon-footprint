@@ -155,38 +155,38 @@ export default function DigitalTwin() {
           
           <div className={styles.inputGroup}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label className={styles.label}>🚗 Car Commute (Days / Week)</label>
+              <label htmlFor="twin-car-days" className={styles.label}>🚗 Car Commute (Days / Week)</label>
               <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{carDays} days</span>
             </div>
-            <input type="range" min="0" max="7" value={carDays} onChange={e => setCarDays(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--primary)' }} />
+            <input id="twin-car-days" type="range" min="0" max="7" value={carDays} onChange={e => setCarDays(Number(e.target.value))} aria-label="Car Commute Days per Week" aria-valuemin="0" aria-valuemax="7" aria-valuenow={carDays} style={{ width: '100%', accentColor: 'var(--primary)' }} />
           </div>
 
           <div className={styles.inputGroup}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label className={styles.label}>🍔 Meat Meals (Meals / Week)</label>
+              <label htmlFor="twin-meat-meals" className={styles.label}>🍔 Meat Meals (Meals / Week)</label>
               <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{meatMeals} meals</span>
             </div>
-            <input type="range" min="0" max="21" value={meatMeals} onChange={e => setMeatMeals(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--primary)' }} />
+            <input id="twin-meat-meals" type="range" min="0" max="21" value={meatMeals} onChange={e => setMeatMeals(Number(e.target.value))} aria-label="Meat Meals per Week" aria-valuemin="0" aria-valuemax="21" aria-valuenow={meatMeals} style={{ width: '100%', accentColor: 'var(--primary)' }} />
           </div>
 
           <div className={styles.inputGroup}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label className={styles.label}>☀️ Clean Solar/Renewable Share
+              <label htmlFor="twin-solar-pct" className={styles.label}>☀️ Clean Solar/Renewable Share
                 <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', padding: '1px 5px', borderRadius: '999px', background: 'rgba(16,185,129,0.15)', color: 'var(--primary)', border: '1px solid rgba(16,185,129,0.3)', verticalAlign: 'middle' }}>
                   Grid: {(liveGridIntensity * 1000).toFixed(0)} gCO₂/kWh
                 </span>
               </label>
               <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{solarPct}%</span>
             </div>
-            <input type="range" min="0" max="100" value={solarPct} onChange={e => setSolarPct(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--primary)' }} />
+            <input id="twin-solar-pct" type="range" min="0" max="100" value={solarPct} onChange={e => setSolarPct(Number(e.target.value))} aria-label="Clean Solar Renewable Energy Share Percentage" aria-valuemin="0" aria-valuemax="100" aria-valuenow={solarPct} style={{ width: '100%', accentColor: 'var(--primary)' }} />
           </div>
 
           <div className={styles.inputGroup}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label className={styles.label}>🌳 Carbon Offsets Contribution</label>
+              <label htmlFor="twin-offsets-pct" className={styles.label}>🌳 Carbon Offsets Contribution</label>
               <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{offsetsPct}%</span>
             </div>
-            <input type="range" min="0" max="100" value={offsetsPct} onChange={e => setOffsetsPct(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--primary)' }} />
+            <input id="twin-offsets-pct" type="range" min="0" max="100" value={offsetsPct} onChange={e => setOffsetsPct(Number(e.target.value))} aria-label="Carbon Offsets Contribution Percentage" aria-valuemin="0" aria-valuemax="100" aria-valuenow={offsetsPct} style={{ width: '100%', accentColor: 'var(--primary)' }} />
           </div>
 
           <button className="btn-primary" style={{ marginTop: '1rem', width: '100%' }} onClick={handleSetGoal} disabled={settingGoal || savingsPct <= 0}>

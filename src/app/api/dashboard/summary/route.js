@@ -50,6 +50,16 @@ export async function GET() {
         : 0;
 
     // ── 6-Month Trend ─────────────────────────────────────────
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const allTrendActivities = await ActivityLog.find({
+      userId: session.user.id,
+      loggedAt: { $gte: sixMonthsAgo }
+    });
+
     const trend = [];
     for (let i = 5; i >= 0; i--) {
       const start = new Date();
@@ -60,9 +70,9 @@ export async function GET() {
       const end = new Date(start);
       end.setMonth(end.getMonth() + 1);
 
-      const activities = await ActivityLog.find({
-        userId: session.user.id,
-        loggedAt: { $gte: start, $lt: end },
+      const activities = allTrendActivities.filter(act => {
+        const d = new Date(act.loggedAt);
+        return d >= start && d < end;
       });
 
       const summary = buildCategorySummary(activities);

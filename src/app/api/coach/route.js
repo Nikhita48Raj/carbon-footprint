@@ -7,9 +7,15 @@ import ActivityLog from '@/models/ActivityLog';
 import { buildCategorySummary, calculateCategoryBaseline, computeActivityEmission } from '@/lib/calculator';
 import Goal from '@/models/Goal';
 import { getGridCarbonIntensity } from '@/lib/gridFactors';
+import { rateLimit } from '@/lib/rateLimiter';
 
 export async function POST(request) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    if (!rateLimit(ip, 10, 60000)) { // 10 requests per minute limit
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

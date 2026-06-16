@@ -23,6 +23,27 @@ export async function PATCH(request) {
       energySource,
     } = body;
 
+    const validDiets = ['high_meat', 'avg_meat', 'pescatarian', 'vegetarian', 'vegan'];
+    const validEnergy = ['grid', 'solar', 'wind', 'mixed'];
+    const validTransport = ['car_petrol', 'car_diesel', 'car_electric', 'car_hybrid', 'bus', 'train', 'subway', 'walking', 'cycling'];
+
+    if (diet && !validDiets.includes(diet)) {
+      return NextResponse.json({ error: 'Invalid diet selection' }, { status: 400 });
+    }
+    if (energySource && !validEnergy.includes(energySource)) {
+      return NextResponse.json({ error: 'Invalid energy source selection' }, { status: 400 });
+    }
+    if (transportMode && !validTransport.includes(transportMode)) {
+      return NextResponse.json({ error: 'Invalid transport mode selection' }, { status: 400 });
+    }
+
+    if (householdSize != null) {
+      const parsedSize = Number(householdSize);
+      if (isNaN(parsedSize) || parsedSize < 1 || parsedSize > 20) {
+        return NextResponse.json({ error: 'Household size must be a number between 1 and 20' }, { status: 400 });
+      }
+    }
+
     const profileUpdate = {
       'profile.onboardingComplete': true,
       ...(location      != null && { 'profile.location':      location      }),

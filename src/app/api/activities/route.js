@@ -47,6 +47,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    await connectDB();
+
     const body = await request.json();
     const { category, subType, amount, unit, notes, source } = body;
 
@@ -57,12 +59,15 @@ export async function POST(request) {
       );
     }
 
-    if (Number(amount) <= 0) {
+    const numericAmount = Number(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0 || numericAmount > 100000) {
       return NextResponse.json(
-        { error: 'Amount must be greater than zero' },
+        { error: 'Amount must be a positive number under 100,000' },
         { status: 400 }
       );
     }
+
+    const sanitizedNotes = (notes || '').substring(0, 500).replace(/[<>]/g, '');
 
     // Fetch live grid intensity to improve electricity calculations accuracy
     let liveGridIntensity = null;
@@ -82,16 +87,14 @@ export async function POST(request) {
     // Calculate real CO₂e using the scientific calculation engine
     const co2e = computeActivityEmission({ category, subType, amount }, liveGridIntensity);
 
-    await connectDB();
-
     const activity = await ActivityLog.create({
       userId: session.user.id,
       category,
       subType,
-      amount,
+      amount: numericAmount,
       unit,
       co2e,
-      notes,
+      notes: sanitizedNotes,
       source: source ?? 'manual',
     });
 
@@ -103,99 +106,105 @@ export async function POST(request) {
         status: 'active',
       });
 
-      for (const goal of activeGoals) {
-        // Calculate actual emissions for this goal's period
-        const query = {
-          userId: session.user.id,
-          loggedAt: { $gte: goal.startDate, $lte: goal.endDate },
-        };
-        if (goal.category !== 'overall') {
-          query.category = goal.category;
+      if (activeGoals.length > 0) {
+        const hasStreakGoal = activeGoals.some(g => g.type === 'streak');
+        const query = { userId: session.user.id };
+        if (!hasStreakGoal) {
+          const minStartDate = activeGoals.reduce((min, g) => {
+            return g.startDate < min ? g.startDate : min;
+          }, activeGoals[0].startDate);
+          query.loggedAt = { $gte: minStartDate };
         }
 
-        const logs = await ActivityLog.find(query);
-        const actualEmissions = logs.reduce((sum, act) => sum + (act.co2e || 0), 0);
+        const allUserLogs = await ActivityLog.find(query).sort({ loggedAt: -1 });
 
-        if (goal.type === 'category_limit') {
-          goal.currentValue = Math.round(actualEmissions * 100) / 100;
-          if (goal.currentValue > goal.targetValue) {
-            goal.status = 'failed';
-          }
-        } else if (goal.type === 'reduction_percentage') {
-          // Calculate baseline for the goal's duration
-          const days = Math.max(
-            1,
-            Math.ceil((goal.endDate.getTime() - goal.startDate.getTime()) / (1000 * 60 * 60 * 24))
-          );
-          const annualCategoryBaseline = calculateCategoryBaseline(user.profile, goal.category);
-          const periodBaseline = (annualCategoryBaseline / 365) * days;
+        for (const goal of activeGoals) {
+          const logs = allUserLogs.filter(act => {
+            const date = new Date(act.loggedAt);
+            const inRange = date >= goal.startDate && date <= goal.endDate;
+            const matchesCategory = goal.category === 'overall' || act.category === goal.category;
+            return inRange && matchesCategory;
+          });
 
-          const savings = periodBaseline - actualEmissions;
-          const reductionPct = periodBaseline > 0 ? (savings / periodBaseline) * 100 : 0;
+          const actualEmissions = logs.reduce((sum, act) => sum + (act.co2e || 0), 0);
 
-          goal.currentValue = Math.round(Math.max(0, reductionPct) * 100) / 100;
-          if (goal.currentValue >= goal.targetValue) {
-            goal.status = 'completed';
-            goal.completedAt = new Date();
-          }
-        } else if (goal.type === 'streak') {
-          // Streak is consecutive days logged
-          const allUserLogs = await ActivityLog.find({ userId: session.user.id }).sort({ loggedAt: -1 });
-          let streak = 0;
-          if (allUserLogs.length > 0) {
-            const uniqueDayStrings = Array.from(
-              new Set(allUserLogs.map(l => new Date(l.loggedAt).toDateString()))
+          if (goal.type === 'category_limit') {
+            goal.currentValue = Math.round(actualEmissions * 100) / 100;
+            if (goal.currentValue > goal.targetValue) {
+              goal.status = 'failed';
+            }
+          } else if (goal.type === 'reduction_percentage') {
+            const days = Math.max(
+              1,
+              Math.ceil((goal.endDate.getTime() - goal.startDate.getTime()) / (1000 * 60 * 60 * 24))
             );
-            const uniqueDays = uniqueDayStrings.map(d => new Date(d));
+            const annualCategoryBaseline = calculateCategoryBaseline(user.profile, goal.category);
+            const periodBaseline = (annualCategoryBaseline / 365) * days;
 
-            let current = new Date();
-            current.setHours(0, 0, 0, 0);
+            const savings = periodBaseline - actualEmissions;
+            const reductionPct = periodBaseline > 0 ? (savings / periodBaseline) * 100 : 0;
 
-            const latestLogDate = new Date(uniqueDays[0]);
-            latestLogDate.setHours(0, 0, 0, 0);
+            goal.currentValue = Math.round(Math.max(0, reductionPct) * 100) / 100;
+            if (goal.currentValue >= goal.targetValue) {
+              goal.status = 'completed';
+              goal.completedAt = new Date();
+            }
+          } else if (goal.type === 'streak') {
+            let streak = 0;
+            if (allUserLogs.length > 0) {
+              const uniqueDayStrings = Array.from(
+                new Set(allUserLogs.map(l => new Date(l.loggedAt).toDateString()))
+              );
+              const uniqueDays = uniqueDayStrings.map(d => new Date(d));
 
-            const diffMs = current.getTime() - latestLogDate.getTime();
-            const diffDays = diffMs / (1000 * 60 * 60 * 24);
+              let current = new Date();
+              current.setHours(0, 0, 0, 0);
 
-            if (diffDays <= 1) {
-              let lastDate = latestLogDate;
-              streak = 1;
-              for (let i = 1; i < uniqueDays.length; i++) {
-                const prevDate = new Date(uniqueDays[i]);
-                prevDate.setHours(0, 0, 0, 0);
-                const dayDiff = (lastDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24);
-                if (dayDiff === 1) {
-                  streak++;
-                  lastDate = prevDate;
-                } else {
-                  break;
+              const latestLogDate = new Date(uniqueDays[0]);
+              latestLogDate.setHours(0, 0, 0, 0);
+
+              const diffMs = current.getTime() - latestLogDate.getTime();
+              const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+              if (diffDays <= 1) {
+                let lastDate = latestLogDate;
+                streak = 1;
+                for (let i = 1; i < uniqueDays.length; i++) {
+                  const prevDate = new Date(uniqueDays[i]);
+                  prevDate.setHours(0, 0, 0, 0);
+                  const dayDiff = (lastDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24);
+                  if (dayDiff === 1) {
+                    streak++;
+                    lastDate = prevDate;
+                  } else {
+                    break;
+                  }
                 }
               }
             }
-          }
-          goal.currentValue = streak;
+            goal.currentValue = streak;
 
-          user.gamification.streakDays = streak;
-          await user.save();
+            user.gamification.streakDays = streak;
+            await user.save();
 
-          if (goal.currentValue >= goal.targetValue) {
-            goal.status = 'completed';
-            goal.completedAt = new Date();
-          }
-        }
-
-        // Check milestones
-        if (goal.targetValue > 0) {
-          const pct = (goal.currentValue / goal.targetValue) * 100;
-          goal.milestones.forEach(m => {
-            if (!m.reached && pct >= m.at) {
-              m.reached = true;
-              m.reachedAt = new Date();
+            if (goal.currentValue >= goal.targetValue) {
+              goal.status = 'completed';
+              goal.completedAt = new Date();
             }
-          });
-        }
+          }
 
-        await goal.save();
+          if (goal.targetValue > 0) {
+            const pct = (goal.currentValue / goal.targetValue) * 100;
+            goal.milestones.forEach(m => {
+              if (!m.reached && pct >= m.at) {
+                m.reached = true;
+                m.reachedAt = new Date();
+              }
+            });
+          }
+
+          await goal.save();
+        }
       }
     }
 
