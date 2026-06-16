@@ -98,7 +98,9 @@ const useStore = create((set, get) => ({
 
   // ── Real-Time Meter ────────────────────────────────────────
   realtimeKgCO2e: 0,
-  setRealtimeKgCO2e: (val) => set({ realtimeKgCO2e: val }),
+  setRealtimeKgCO2e: (val) => set((state) => ({
+    realtimeKgCO2e: typeof val === 'function' ? val(state.realtimeKgCO2e) : val
+  })),
 
   // ── UI Notifications ───────────────────────────────────────
   toast: null,

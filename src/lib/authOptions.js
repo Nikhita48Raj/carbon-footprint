@@ -43,6 +43,7 @@ export const authOptions = {
     },
     async session({ session, token }) {
       if (token) {
+        session.user = session.user || {};
         session.user.id    = token.id;
         session.user.onboardingComplete = token.onboardingComplete;
       }

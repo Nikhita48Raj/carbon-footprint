@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -34,11 +34,18 @@ const TOTAL_STEPS = 4;
 
 export default function Onboarding() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Auth guard
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login');
+    }
+  }, [status, router]);
 
   const [formData, setFormData] = useState({
     location:      '',
@@ -73,6 +80,15 @@ export default function Onboarding() {
     if (step < TOTAL_STEPS) setStep(s => s + 1);
     else handleFinish();
   };
+
+  if (status === 'loading') {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ width: '48px', height: '48px', border: '3px solid rgba(16,185,129,0.2)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <p style={{ color: 'rgba(255,255,255,0.6)' }}>Loading your profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

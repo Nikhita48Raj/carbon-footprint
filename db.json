@@ -28,6 +28,21 @@
       "updatedAt": "2026-06-16T16:54:16.280Z"
     }
   ],
-  "activities": [],
+  "activities": [
+    {
+      "_id": "vbcax5q",
+      "userId": "4g2s4f1",
+      "category": "transport",
+      "subType": "car_petrol",
+      "amount": 15,
+      "unit": "km",
+      "co2e": 2.5574,
+      "notes": "",
+      "source": "manual",
+      "loggedAt": "2026-06-16T17:13:27.093Z",
+      "createdAt": "2026-06-16T17:13:27.093Z",
+      "updatedAt": "2026-06-16T17:13:27.093Z"
+    }
+  ],
   "goals": []
 }
