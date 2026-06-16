@@ -1,25 +1,23 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const DB_PATH = path.join(process.cwd(), 'db.json');
 
-function readDB() {
-  if (!fs.existsSync(DB_PATH)) {
-    fs.writeFileSync(
-      DB_PATH,
-      JSON.stringify({ users: [], activities: [], goals: [] }, null, 2)
-    );
-  }
+async function readDB() {
   try {
-    return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    const content = await fs.readFile(DB_PATH, 'utf8');
+    return JSON.parse(content);
   } catch (e) {
-    return { users: [], activities: [], goals: [] };
+    const initialData = { users: [], activities: [], goals: [] };
+    await fs.writeFile(DB_PATH, JSON.stringify(initialData, null, 2));
+    return initialData;
   }
 }
 
-function writeDB(data) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+async function writeDB(data) {
+  await fs.writeFile(DB_PATH, JSON.stringify(data, null, 2));
 }
 
 function decorateUser(user) {
@@ -30,7 +28,7 @@ function decorateUser(user) {
       return bcrypt.compare(candidate, this.password);
     },
     save: async function () {
-      const db = readDB();
+      const db = await readDB();
       const idx = db.users.findIndex((u) => u._id.toString() === this._id.toString());
       if (idx !== -1) {
         db.users[idx] = {
@@ -42,7 +40,7 @@ function decorateUser(user) {
           gamification: this.gamification,
           updatedAt: new Date().toISOString()
         };
-        writeDB(db);
+        await writeDB(db);
       }
       return this;
     }
@@ -54,7 +52,7 @@ function decorateGoal(goal) {
   return {
     ...goal,
     save: async function () {
-      const db = readDB();
+      const db = await readDB();
       const idx = db.goals.findIndex((g) => g._id.toString() === this._id.toString());
       if (idx !== -1) {
         db.goals[idx] = {
@@ -65,7 +63,7 @@ function decorateGoal(goal) {
           milestones: this.milestones,
           updatedAt: new Date().toISOString()
         };
-        writeDB(db);
+        await writeDB(db);
       }
       return this;
     }
@@ -74,30 +72,34 @@ function decorateGoal(goal) {
 
 export const MockUser = {
   findOne: (query) => {
-    const db = readDB();
-    let found = null;
-    if (query.email) {
-      found = db.users.find((u) => u.email.toLowerCase() === query.email.toLowerCase());
-    }
-    const decorated = decorateUser(found);
+    const getDecorated = async () => {
+      const db = await readDB();
+      let found = null;
+      if (query.email) {
+        found = db.users.find((u) => u.email.toLowerCase() === query.email.toLowerCase());
+      }
+      return decorateUser(found);
+    };
+
+    const promise = getDecorated();
     return {
       select: function (fields) {
-        return Promise.resolve(decorated);
+        return promise;
       },
       then: function (onFulfilled, onRejected) {
-        return Promise.resolve(decorated).then(onFulfilled, onRejected);
+        return promise.then(onFulfilled, onRejected);
       }
     };
   },
 
   findById: async (id) => {
-    const db = readDB();
+    const db = await readDB();
     const found = db.users.find((u) => u._id.toString() === id.toString());
     return decorateUser(found);
   },
 
   findByIdAndUpdate: async (id, update, options) => {
-    const db = readDB();
+    const db = await readDB();
     const idx = db.users.findIndex((u) => u._id.toString() === id.toString());
     if (idx === -1) return null;
 
@@ -118,15 +120,15 @@ export const MockUser = {
       }
     }
     user.updatedAt = new Date().toISOString();
-    writeDB(db);
+    await writeDB(db);
     return decorateUser(user);
   },
 
   create: async (data) => {
-    const db = readDB();
+    const db = await readDB();
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const newUser = {
-      _id: Math.random().toString(36).substring(2, 9),
+      _id: crypto.randomUUID(),
       name: data.name,
       email: data.email.toLowerCase(),
       password: hashedPassword,
@@ -145,14 +147,14 @@ export const MockUser = {
       updatedAt: new Date().toISOString()
     };
     db.users.push(newUser);
-    writeDB(db);
+    await writeDB(db);
     return decorateUser(newUser);
   }
 };
 
 export const MockActivityLog = {
   find: async (query) => {
-    const db = readDB();
+    const db = await readDB();
     let logs = db.activities.filter((a) => a.userId.toString() === query.userId.toString());
     if (query.loggedAt && query.loggedAt.$gte) {
       const minDate = new Date(query.loggedAt.$gte);
@@ -169,23 +171,23 @@ export const MockActivityLog = {
   },
 
   create: async (data) => {
-    const db = readDB();
+    const db = await readDB();
     const newLog = {
-      _id: Math.random().toString(36).substring(2, 9),
+      _id: crypto.randomUUID(),
       ...data,
       loggedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     db.activities.push(newLog);
-    writeDB(db);
+    await writeDB(db);
     return newLog;
   }
 };
 
 export const MockGoal = {
   find: async (query) => {
-    const db = readDB();
+    const db = await readDB();
     let goals = db.goals.filter((g) => g.userId.toString() === query.userId.toString());
     if (query.status) {
       goals = goals.filter((g) => g.status === query.status);
@@ -197,9 +199,9 @@ export const MockGoal = {
   },
 
   create: async (data) => {
-    const db = readDB();
+    const db = await readDB();
     const newGoal = {
-      _id: Math.random().toString(36).substring(2, 9),
+      _id: crypto.randomUUID(),
       ...data,
       currentValue: data.currentValue ?? 0,
       status: data.status ?? 'active',
@@ -208,7 +210,7 @@ export const MockGoal = {
       updatedAt: new Date().toISOString()
     };
     db.goals.push(newGoal);
-    writeDB(db);
+    await writeDB(db);
     return decorateGoal(newGoal);
   }
 };
