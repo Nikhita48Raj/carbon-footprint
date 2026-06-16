@@ -86,4 +86,7 @@ const GoalSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Goal || mongoose.model('Goal', GoalSchema);
+import { MockGoal } from '@/lib/dbMock';
+export default process.env.MONGODB_URI 
+  ? (mongoose.models.Goal || mongoose.model('Goal', GoalSchema))
+  : MockGoal;

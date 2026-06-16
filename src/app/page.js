@@ -9,7 +9,8 @@ export default function Home() {
         <p className={styles.subtitle}>
           Understand, track, and reduce your carbon footprint through actionable insights and gamified goals.
         </p>
-        <Link href="/onboarding" className="btn-primary">Start Your Journey</Link>
+        <Link href="/auth/register" className="btn-primary">Start Your Journey</Link>
+        <Link href="/auth/login" style={{ marginLeft: '1rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>Already have an account? Sign in</Link>
       </div>
 
       <div className={`glass-panel ${styles.dashboardPreview}`}>

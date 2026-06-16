@@ -1,6 +1,8 @@
 "use client";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import useStore from '@/store/useStore';
 import { 
   LayoutDashboard, 
   Activity, 
@@ -18,8 +20,12 @@ import styles from './Navigation.module.css';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const { dashboardData } = useStore();
 
-  if (pathname === '/' || pathname === '/onboarding') return null;
+  if (pathname === '/' || pathname === '/onboarding' || pathname.startsWith('/auth')) {
+    return null;
+  }
 
   const links = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -34,6 +40,17 @@ export default function Navigation() {
     { href: '/education', label: 'Learn', icon: BookOpen },
     { href: '/coach', label: 'AI Advisor', icon: MessageSquare },
   ];
+
+  const userObj = dashboardData?.user || {};
+  const name = userObj.name || session?.user?.name || 'Eco Warrior';
+  const level = userObj.gamification?.level || 1;
+
+  const initials = name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
 
   return (
     <nav className={styles.sidebar}>
@@ -58,10 +75,10 @@ export default function Navigation() {
         })}
       </ul>
       <div className={styles.userProfile}>
-        <div className={styles.avatar}>EW</div>
+        <div className={styles.avatar}>{initials}</div>
         <div className={styles.userInfo}>
-          <span className={styles.userName}>Eco Warrior</span>
-          <span className={styles.userLevel}>Level 3</span>
+          <span className={styles.userName}>{name}</span>
+          <span className={styles.userLevel}>Level {level}</span>
         </div>
       </div>
     </nav>

@@ -19,6 +19,17 @@ export default function Goals() {
     endDate: '',
   });
 
+  const handleTypeChange = (typeVal) => {
+    let unit = 'percent';
+    if (typeVal === 'category_limit') unit = 'kg_co2e';
+    else if (typeVal === 'streak') unit = 'days';
+    setForm(prev => ({
+      ...prev,
+      type: typeVal,
+      targetUnit: unit,
+    }));
+  };
+
   useEffect(() => {
     if (session) fetchGoals();
   }, [session]);
@@ -63,7 +74,7 @@ export default function Goals() {
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.label}>Goal Type</label>
-              <select className={styles.select} value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+              <select className={styles.select} value={form.type} onChange={e => handleTypeChange(e.target.value)}>
                 <option value="reduction_percentage">% Reduction</option>
                 <option value="category_limit">Category Limit (kg)</option>
                 <option value="streak">Streak (days)</option>

@@ -1,0 +1,33 @@
+{
+  "users": [
+    {
+      "_id": "4g2s4f1",
+      "name": "nick",
+      "email": "nick48hack@gmail.com",
+      "password": "$2b$10$x6pXb9tRpFZY8Cg/W31i9Oc5Qg.mOW9ouZsM6D1fapxO0y6nxPu2C",
+      "profile": {
+        "onboardingComplete": false,
+        "location": "",
+        "country": "",
+        "householdSize": 1,
+        "diet": "avg_meat",
+        "transportMode": "car_petrol",
+        "energySource": "grid"
+      },
+      "baseline": {
+        "annualKgCO2e": 0,
+        "calculatedAt": null
+      },
+      "gamification": {
+        "level": 1,
+        "streakDays": 0,
+        "totalPoints": 0,
+        "badges": []
+      },
+      "createdAt": "2026-06-16T16:54:16.280Z",
+      "updatedAt": "2026-06-16T16:54:16.280Z"
+    }
+  ],
+  "activities": [],
+  "goals": []
+}

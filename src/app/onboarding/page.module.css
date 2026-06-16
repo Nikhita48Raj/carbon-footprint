@@ -90,6 +90,13 @@
   outline: none;
 }
 
+.optionSelected {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  color: white;
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;

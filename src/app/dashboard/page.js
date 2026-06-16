@@ -33,9 +33,9 @@ export default function Dashboard() {
   useEffect(() => {
     const annual = dashboardData?.annualProjection ?? 4200;
     const tick = dashboardData?.tickRate ?? getRealtimeTickRate(annual);
-    const baseline = (annual / 1000) * ((new Date().getDayOfYear?.() ?? 162) / 365);
 
-    setRealtimeKgCO2e(annual * 0.45); // start from year-to-date estimate
+    // Seed the real-time meter at ~45% of the annual projection (mid-year estimate)
+    setRealtimeKgCO2e(annual * 0.45);
 
     tickRef.current = setInterval(() => {
       setRealtimeKgCO2e(prev => prev + tick * 2);
@@ -117,6 +117,18 @@ export default function Dashboard() {
         </div>
       </section>
 
+      {summary.total === 0 && (
+        <section className="glass-panel" style={{ padding: '2.5rem', marginBottom: '1.5rem', textAlign: 'center', background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(59,130,246,0.12))', border: '1px dashed var(--primary)' }}>
+          <h2 style={{ fontSize: '1.5rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>🌱 Start Your Carbon Reduction Journey!</h2>
+          <p style={{ color: 'rgba(255,255,255,0.7)', maxWidth: '600px', margin: '0 auto 1.5rem', lineHeight: '1.5' }}>
+            Welcome to EcoTrack! You haven't logged any activities this month. Log your commutes, meals, or home energy usage to see your real-time carbon footprint and start reducing your impact.
+          </p>
+          <button className="btn-primary" onClick={() => router.push('/tracking')}>
+            Log Your First Activity
+          </button>
+        </section>
+      )}
+
       <div className={styles.grid}>
         {/* Monthly total */}
         <section className={`glass-panel ${styles.mainCard}`}>
@@ -133,23 +145,29 @@ export default function Dashboard() {
         {/* Category breakdown */}
         <section className={`glass-panel ${styles.sideCard}`}>
           <h2>Category Breakdown</h2>
-          <ul className={styles.categoryList}>
-            {[
-              { label: '🚗 Transport', val: summary.transport, color: '#ef4444' },
-              { label: '⚡ Energy',    val: summary.energy,    color: '#f59e0b' },
-              { label: '🍔 Food',      val: summary.food,      color: '#10b981' },
-              { label: '🛍️ Shopping', val: summary.shopping,  color: '#3b82f6' },
-              { label: '🗑️ Waste',    val: summary.waste,     color: '#8b5cf6' },
-            ].map(({ label, val, color }) => (
-              <li key={label} className={styles.categoryItem}>
-                <span style={{ fontSize: '0.85rem' }}>{label}</span>
-                <div className={styles.barContainer}>
-                  <div className={styles.bar} style={{ width: summary.total ? `${(val / summary.total) * 100}%` : '0%', background: color }}></div>
-                </div>
-                <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', minWidth: '50px', textAlign: 'right' }}>{val.toFixed(1)} kg</span>
-              </li>
-            ))}
-          </ul>
+          {summary.total === 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '150px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', fontSize: '0.9rem' }}>No data logged yet. Log your first activity to see your breakdown.</p>
+            </div>
+          ) : (
+            <ul className={styles.categoryList}>
+              {[
+                { label: '🚗 Transport', val: summary.transport, color: '#ef4444' },
+                { label: '⚡ Energy',    val: summary.energy,    color: '#f59e0b' },
+                { label: '🍔 Food',      val: summary.food,      color: '#10b981' },
+                { label: '🛍️ Shopping', val: summary.shopping,  color: '#3b82f6' },
+                { label: '🗑️ Waste',    val: summary.waste,     color: '#8b5cf6' },
+              ].map(({ label, val, color }) => (
+                <li key={label} className={styles.categoryItem}>
+                  <span style={{ fontSize: '0.85rem' }}>{label}</span>
+                  <div className={styles.barContainer}>
+                    <div className={styles.bar} style={{ width: summary.total ? `${(val / summary.total) * 100}%` : '0%', background: color }}></div>
+                  </div>
+                  <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', minWidth: '50px', textAlign: 'right' }}>{val.toFixed(1)} kg</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         {/* 6-month trend */}
@@ -163,9 +181,15 @@ export default function Dashboard() {
         {/* Doughnut */}
         <section className="glass-panel" style={{ padding: '1.5rem' }}>
           <h2 style={{ marginBottom: '1rem' }}>Monthly Split</h2>
-          <div style={{ height: '220px', position: 'relative' }}>
-            <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'white', font: { size: 11 } } } } }} />
-          </div>
+          {summary.total === 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '150px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', fontSize: '0.9rem' }}>No emissions data for this month.</p>
+            </div>
+          ) : (
+            <div style={{ height: '220px', position: 'relative' }}>
+              <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'white', font: { size: 11 } } } } }} />
+            </div>
+          )}
         </section>
 
         {/* Benchmarks */}

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 import connectDB from '@/lib/db';
 import ActivityLog from '@/models/ActivityLog';
 import User from '@/models/User';
@@ -9,7 +10,7 @@ import { GLOBAL_AVERAGES } from '@/lib/emissionFactors';
 // GET /api/dashboard/summary  — returns all data needed to populate the dashboard
 export async function GET() {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -71,8 +72,14 @@ export async function GET() {
     }
 
     // ── Annual Projection & Real-Time Meter ───────────────────
-    const daysInMonth = new Date().getDate();
-    const annualProjection = annualise(monthlySummary.total, daysInMonth);
+    let earliestDate = monthStart;
+    if (monthActivities.length > 0) {
+      earliestDate = monthActivities.reduce((minDate, act) => {
+        const d = new Date(act.loggedAt);
+        return d < minDate ? d : minDate;
+      }, new Date(monthActivities[0].loggedAt));
+    }
+    const annualProjection = annualise(monthlySummary.total, earliestDate);
     const tickRate = getRealtimeTickRate(
       user.baseline.annualKgCO2e || annualProjection
     );

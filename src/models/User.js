@@ -66,4 +66,7 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-export default mongoose.models.User || mongoose.model('User', UserSchema);
+import { MockUser } from '@/lib/dbMock';
+export default process.env.MONGODB_URI 
+  ? (mongoose.models.User || mongoose.model('User', UserSchema))
+  : MockUser;

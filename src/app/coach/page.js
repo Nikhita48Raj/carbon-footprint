@@ -4,42 +4,66 @@ import styles from '../shared.module.css';
 
 export default function Coach() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', text: 'Hi Eco Warrior! I am your AI Sustainability Advisor. I can answer questions or generate a personalized Weekly Action Plan for you based on your recent activity.' }
+    { role: 'assistant', text: 'Hi! I am your AI Sustainability Advisor. I can answer questions or generate a personalized Weekly Action Plan for you based on your recent activities and carbon profile.' }
   ]);
   const [input, setInput] = useState('');
   const [generating, setGenerating] = useState(false);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const newMsgs = [...messages, { role: 'user', text: input }];
+  const handleSend = async () => {
+    if (!input.trim() || generating) return;
+    const userMsg = input.trim();
+    const newMsgs = [...messages, { role: 'user', text: userMsg }];
     setMessages(newMsgs);
     setInput('');
     setGenerating(true);
-    
-    setTimeout(() => {
-      setMessages([...newMsgs, { 
-        role: 'assistant', 
-        text: 'That\'s a great question! Based on your digital twin models, reducing meat consumption by just 2 meals a week will have the highest immediate impact on your footprint.' 
-      }]);
+
+    try {
+      const res = await fetch('/api/coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMsg }),
+      });
+      if (!res.ok) throw new Error('Failed to generate response');
+      const data = await res.json();
+      setMessages([...newMsgs, { role: 'assistant', text: data.text }]);
+    } catch (err) {
+      setMessages([...newMsgs, { role: 'assistant', text: 'Sorry, I encountered an issue connecting to the carbon advisor engine. Please try again.' }]);
+    } finally {
       setGenerating(false);
-    }, 1500);
+    }
   };
 
-  const generateWeeklyPlan = () => {
+  const generateWeeklyPlan = async () => {
+    if (generating) return;
     setGenerating(true);
-    setTimeout(() => {
-      setMessages([...messages, {
-        role: 'assistant',
-        text: `**Your Personalized Weekly Action Plan:**\n\n1. **Monday**: Participate in "Meatless Monday". (Impact: High)\n2. **Wednesday**: Work from home or take public transit to the office. (Impact: Very High)\n3. **Saturday**: Review your smart meter data and optimize your thermostat schedule. (Impact: Medium)\n\n*Why?* Your smart home integration shows your HVAC is running during peak grid hours. Shifting this can save you 5% in emissions this week alone!`
-      }]);
+    try {
+      const res = await fetch('/api/coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'generateWeeklyPlan' }),
+      });
+      if (!res.ok) throw new Error('Failed to generate plan');
+      const data = await res.json();
+      setMessages([...messages, { role: 'assistant', text: data.text }]);
+    } catch (err) {
+      setMessages([...messages, { role: 'assistant', text: 'Failed to generate your personalized action plan. Please check your network connection.' }]);
+    } finally {
       setGenerating(false);
-    }, 2000);
+    }
+  };
+
+  const formatText = (text) => {
+    // Replace **text** with <strong>text</strong>
+    let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Replace bullet lists
+    html = html.replace(/^\*\s*(.*?)$/gm, '• $1');
+    return html;
   };
 
   return (
-    <div className={styles.container} style={{maxHeight: '100vh', overflow: 'hidden'}}>
+    <div className={styles.container} style={{maxHeight: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
       <header className={styles.header}>
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
           <div>
             <h1 className={styles.title}>AI Sustainability Advisor</h1>
             <p className={styles.subtitle}>Your generative AI assistant for a greener lifestyle.</p>
@@ -50,23 +74,29 @@ export default function Coach() {
         </div>
       </header>
 
-      <div className={`glass-panel`} style={{display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', marginTop: '1rem', borderRadius: '1rem'}}>
+      <div className={`glass-panel`} style={{display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', marginTop: '1rem', borderRadius: '1rem', minHeight: '400px'}}>
         <div style={{flex: 1, padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem'}}>
           {messages.map((m, i) => (
             <div key={i} style={{
               alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
               background: m.role === 'user' ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
               border: m.role === 'assistant' ? '1px solid rgba(255,255,255,0.1)' : 'none',
-              padding: '1.5rem',
+              padding: '1.25rem 1.5rem',
               borderRadius: '1rem',
               maxWidth: '75%',
               lineHeight: '1.6',
-              whiteSpace: 'pre-wrap'
-            }}>
-              {m.text}
+              whiteSpace: 'pre-wrap',
+              fontSize: '0.95rem',
+              color: 'white'
+            }} dangerouslySetInnerHTML={{ __html: formatText(m.text) }}>
             </div>
           ))}
-          {generating && <div style={{alignSelf: 'flex-start', color: 'rgba(255,255,255,0.5)'}}>AI is typing...</div>}
+          {generating && (
+            <div style={{alignSelf: 'flex-start', display: 'flex', gap: '0.5rem', alignItems: 'center', color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem'}}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: 'pulse 1s infinite alternate' }}></div>
+              Advisor is composing...
+            </div>
+          )}
         </div>
         
         <div style={{padding: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '1rem'}}>
@@ -74,13 +104,13 @@ export default function Coach() {
             type="text" 
             className={styles.input} 
             style={{flex: 1}} 
-            placeholder="Ask me anything..." 
+            placeholder="Ask about your footprint, diet, or commutes..." 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             disabled={generating}
           />
-          <button className="btn-primary" onClick={handleSend} disabled={generating}>Send</button>
+          <button className="btn-primary" onClick={handleSend} disabled={generating || !input.trim()}>Send</button>
         </div>
       </div>
     </div>

@@ -62,5 +62,7 @@ const ActivityLogSchema = new mongoose.Schema(
 // Compound index to efficiently query a user's logs over a date range
 ActivityLogSchema.index({ userId: 1, loggedAt: -1 });
 
-export default mongoose.models.ActivityLog ||
-  mongoose.model('ActivityLog', ActivityLogSchema);
+import { MockActivityLog } from '@/lib/dbMock';
+export default process.env.MONGODB_URI 
+  ? (mongoose.models.ActivityLog || mongoose.model('ActivityLog', ActivityLogSchema))
+  : MockActivityLog;

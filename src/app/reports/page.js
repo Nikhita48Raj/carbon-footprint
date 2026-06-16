@@ -1,4 +1,6 @@
 "use client";
+import { useEffect } from 'react';
+import useStore from '@/store/useStore';
 import styles from '../shared.module.css';
 import {
   Chart as ChartJS,
@@ -27,12 +29,41 @@ ChartJS.register(
 );
 
 export default function Reports() {
+  const { dashboardData, dashboardLoading, fetchDashboard } = useStore();
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  if (dashboardLoading) {
+    return (
+      <div className={styles.container}>
+        <p style={{ color: 'rgba(255,255,255,0.5)' }}>Loading report data...</p>
+      </div>
+    );
+  }
+
+  const defaultTrend = [0, 0, 0, 0, 0, 0];
+  const defaultLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+
+  const trendLabels = dashboardData?.trend ? dashboardData.trend.map(t => t.label) : defaultLabels;
+  const trendData = dashboardData?.trend ? dashboardData.trend.map(t => t.total) : defaultTrend;
+
+  const monthlySummary = dashboardData?.monthlySummary || {
+    transport: 0,
+    energy: 0,
+    food: 0,
+    shopping: 0,
+    waste: 0,
+    total: 0,
+  };
+
   const lineData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: trendLabels,
     datasets: [
       {
-        label: 'Total Emissions (kg CO₂)',
-        data: [400, 380, 390, 360, 340, 320],
+        label: 'Total Emissions (kg CO₂e)',
+        data: trendData,
         borderColor: '#10b981',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
         fill: true,
@@ -45,7 +76,13 @@ export default function Reports() {
     labels: ['Transport', 'Energy', 'Food', 'Shopping', 'Waste'],
     datasets: [
       {
-        data: [40, 30, 15, 10, 5],
+        data: [
+          monthlySummary.transport,
+          monthlySummary.energy,
+          monthlySummary.food,
+          monthlySummary.shopping,
+          monthlySummary.waste
+        ],
         backgroundColor: [
           '#ef4444',
           '#f59e0b',
@@ -78,6 +115,20 @@ export default function Reports() {
     }
   };
 
+  // Extract highest contributor
+  const categories = ['transport', 'energy', 'food', 'shopping', 'waste'];
+  let highestCategory = 'None';
+  let highestValue = 0;
+  categories.forEach(cat => {
+    const val = monthlySummary[cat] || 0;
+    if (val > highestValue) {
+      highestValue = val;
+      highestCategory = cat;
+    }
+  });
+
+  const monthChange = dashboardData?.monthChange ?? 0;
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -105,17 +156,32 @@ export default function Reports() {
           <div style={{display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%'}}>
             <div style={{display: 'flex', justifyContent: 'space-between'}}>
               <span className={styles.label}>Total Emissions</span>
-              <span style={{fontWeight: 'bold', fontSize: '1.2rem'}}>320 kg CO₂</span>
+              <span style={{fontWeight: 'bold', fontSize: '1.2rem'}}>{monthlySummary.total.toFixed(1)} kg CO₂e</span>
             </div>
             <div style={{display: 'flex', justifyContent: 'space-between'}}>
               <span className={styles.label}>Change vs Last Month</span>
-              <span style={{color: 'var(--success)', fontWeight: 'bold', fontSize: '1.2rem'}}>-5.8%</span>
+              <span style={{
+                color: monthChange < 0 ? 'var(--success)' : monthChange > 0 ? '#ef4444' : 'white',
+                fontWeight: 'bold',
+                fontSize: '1.2rem'
+              }}>
+                {monthChange > 0 ? '+' : ''}{monthChange.toFixed(1)}%
+              </span>
             </div>
             <div style={{display: 'flex', justifyContent: 'space-between'}}>
               <span className={styles.label}>Highest Contributor</span>
-              <span style={{color: '#ef4444', fontWeight: 'bold', fontSize: '1.2rem'}}>Transport</span>
+              <span style={{
+                color: highestCategory !== 'None' ? '#ef4444' : 'white',
+                fontWeight: 'bold',
+                fontSize: '1.2rem',
+                textTransform: 'capitalize'
+              }}>
+                {highestCategory}
+              </span>
             </div>
-            <button className="btn-primary" style={{marginTop: 'auto'}}>Download PDF Report</button>
+            <button className="btn-primary" style={{marginTop: 'auto'}} onClick={() => window.print()}>
+              Download PDF Report
+            </button>
           </div>
         </section>
       </div>

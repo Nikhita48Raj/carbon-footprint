@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useStore from '@/store/useStore';
 import styles from '../shared.module.css';
@@ -65,7 +65,7 @@ const CATEGORY_OPTIONS = {
 
 export default function Tracking() {
   const { data: session } = useSession();
-  const { logActivity, activities, showToast } = useStore();
+  const { logActivity, activities, fetchActivities, showToast } = useStore();
 
   const [category, setCategory]  = useState('transport');
   const [subType,  setSubType]   = useState('car_petrol');
@@ -73,6 +73,12 @@ export default function Tracking() {
   const [notes,    setNotes]     = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [lastResult, setLastResult] = useState(null);
+
+  useEffect(() => {
+    if (session) {
+      fetchActivities();
+    }
+  }, [session]);
 
   const options = CATEGORY_OPTIONS[category] ?? [];
   const selected = options.find(o => o.value === subType) ?? options[0];
