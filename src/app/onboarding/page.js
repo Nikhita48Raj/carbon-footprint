@@ -107,7 +107,7 @@ export default function Onboarding() {
         {step === 1 && (
           <div className={styles.stepContent}>
             <h2 className="heading-lg">Welcome! 🌍</h2>
-            <p className={styles.subtitle}>Let's build your carbon profile.</p>
+            <p className={styles.subtitle}>Let&apos;s build your carbon profile.</p>
 
             <label className={styles.label}>City / Region</label>
             <input

@@ -15,7 +15,7 @@ export default function Simulator() {
     <div className={styles.container}>
       <header className={styles.header}>
         <h1 className={styles.title}>Carbon Impact Simulator</h1>
-        <p className={styles.subtitle}>See "What happens if..." you change your habits.</p>
+        <p className={styles.subtitle}>See &quot;What happens if...&quot; you change your habits.</p>
       </header>
 
       <div className={styles.grid}>

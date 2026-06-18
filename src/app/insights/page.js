@@ -4,11 +4,17 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useStore from '@/store/useStore';
 
+const getThirtyDayTargetDate = () => {
+  const target = new Date();
+  target.setDate(target.getDate() + 30);
+  return target.toISOString().split('T')[0];
+};
+
 export default function Insights() {
   const { data: session } = useSession();
   const { showToast } = useStore();
   const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [sortBy, setSortBy] = useState('impact'); // 'impact', 'cost', 'roi'
   const [activatingId, setActivatingId] = useState(null);
 
@@ -23,12 +29,15 @@ export default function Insights() {
       } catch (err) {
         console.error('Error fetching profile for insights:', err);
       } finally {
-        setLoading(false);
+        setProfileLoaded(true);
       }
     }
-    if (session) getProfile();
-    else setLoading(false);
+    if (session) {
+      getProfile();
+    }
   }, [session]);
+
+  const loading = Boolean(session && !profileLoaded);
 
   const generateRecommendations = () => {
     const profile = profileData?.profile || {};
@@ -168,7 +177,7 @@ export default function Insights() {
           targetValue: rec.goalTarget,
           targetUnit: 'percent',
           period: 'monthly',
-          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          endDate: getThirtyDayTargetDate(),
         }),
       });
       if (!res.ok) throw new Error();

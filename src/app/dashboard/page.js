@@ -181,7 +181,7 @@ export default function Dashboard() {
         <section className="glass-panel" style={{ padding: '2.5rem', marginBottom: '1.5rem', textAlign: 'center', background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(59,130,246,0.12))', border: '1px dashed var(--primary)' }}>
           <h2 style={{ fontSize: '1.5rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>🌱 Start Your Carbon Reduction Journey!</h2>
           <p style={{ color: 'rgba(255,255,255,0.7)', maxWidth: '600px', margin: '0 auto 1.5rem', lineHeight: '1.5' }}>
-            Welcome to EcoTrack! You haven't logged any activities this month. Log your commutes, meals, or home energy usage to see your real-time carbon footprint and start reducing your impact.
+            Welcome to EcoTrack! You haven&apos;t logged any activities this month. Log your commutes, meals, or home energy usage to see your real-time carbon footprint and start reducing your impact.
           </p>
           <button className="btn-primary" onClick={() => router.push('/tracking')}>
             Log Your First Activity

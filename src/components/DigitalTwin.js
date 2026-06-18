@@ -33,7 +33,7 @@ export default function DigitalTwin({ co2e = 0, energySource = 'grid', goalsComp
         {/* SVG Drawing Canvas */}
         <svg viewBox="0 0 400 300" width="100%" height="100%" style={{ transition: 'all 0.5s ease' }} aria-labelledby="twin-svg-title twin-svg-desc" role="img">
           <title id="twin-svg-title">Digital Carbon Twin Illustration</title>
-          <desc id="twin-svg-desc">A dynamic representation of the user's carbon footprint impact, visualised as a clean island with wind turbines and solar panels for low emissions, or a polluted landscape with factory smog for high emissions.</desc>
+          <desc id="twin-svg-desc">A dynamic representation of the user&apos;s carbon footprint impact, visualised as a clean island with wind turbines and solar panels for low emissions, or a polluted landscape with factory smog for high emissions.</desc>
           {/* Sun or Hazy Light */}
           {isLow && (
             <circle cx="340" cy="60" r="30" fill="#fef08a" filter="drop-shadow(0px 0px 8px #fef08a)" />

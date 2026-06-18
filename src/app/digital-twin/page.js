@@ -4,12 +4,18 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useStore from '@/store/useStore';
 
+const getThirtyDayTargetDate = () => {
+  const target = new Date();
+  target.setDate(target.getDate() + 30);
+  return target.toISOString().split('T')[0];
+};
+
 export default function DigitalTwin() {
   const { data: session } = useSession();
   const { showToast } = useStore();
 
   const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [liveGridIntensity, setLiveGridIntensity] = useState(0.23314); // default UK baseline
 
   // Sliders state
@@ -47,12 +53,15 @@ export default function DigitalTwin() {
       } catch (err) {
         console.error('Error fetching data for digital twin:', err);
       } finally {
-        setLoading(false);
+        setProfileLoaded(true);
       }
     }
-    if (session) getProfile();
-    else setLoading(false);
+    if (session) {
+      getProfile();
+    }
   }, [session]);
+
+  const loading = Boolean(session && !profileLoaded);
 
   const getProfileBaselines = () => {
     const defaultBaselines = { transport: 1278, energy: 2906, food: 2737, shopping: 200, waste: 232, total: 5353 };
@@ -120,7 +129,7 @@ export default function DigitalTwin() {
           targetValue: savingsPct || 10,
           targetUnit: 'percent',
           period: 'monthly',
-          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          endDate: getThirtyDayTargetDate(),
         }),
       });
       if (!res.ok) throw new Error();

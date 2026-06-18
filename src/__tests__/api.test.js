@@ -780,7 +780,7 @@ describe('EcoTrack API Routes Integration Tests', () => {
         const response = await postCoach(request);
         expect(response.status).toBe(200);
         const json = await response.json();
-        expect(json.text).toContain('current diet profile is avg_meat');
+        expect(json.text).toContain('current diet profile is avg meat');
       });
 
       test('POST - replies to transport/car queries', async () => {

@@ -116,10 +116,14 @@ describe('EcoTrack Carbon Calculation Engine', () => {
 
   describe('annualise', () => {
     test('annualises footprint based on elapsed date span', () => {
-      const earliest = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000); // 10 days ago
+      const now = new Date('2026-06-18T00:00:00.000Z').getTime();
+      jest.spyOn(Date, 'now').mockReturnValue(now);
+
+      const earliest = new Date(now - 10 * 24 * 60 * 60 * 1000);
       const total = 100;
-      // days = 10. (100 / 10) * 365 = 3650
+
       expect(annualise(total, earliest)).toBe(3650);
+      Date.now.mockRestore();
     });
   });
 
