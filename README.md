@@ -5,17 +5,17 @@
 
 ## 📸 Application Preview
 
-### Home Page
-![Homepage](assets/screenshots/Homepage.png)
-
 ### Dashboard & Digital Twin
-![Dashboard](assets/screenshots/Dashboard.png)
+![Dashboard](./screenshots/Dashboard.png)
 
-### Gemini Vision Plate Scan
-![Gemini Plate Scan](assets/screenshots/GeminiPlateScan.png)
+### AI-Powered Gemini Plate Scan
+![Gemini Plate Scan](./screenshots/platescan.png)
 
-### Smart Home Simulator
-![Smart Home](assets/screenshots/SmartHome.png)
+### AI Sustainability Advisor
+![AI Advisor](./screenshots/aiadvisor.png)
+
+### Activity Tracking & Carbon Logging
+![Track Log](./screenshots/Track.png)
 
 
 
