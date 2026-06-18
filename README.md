@@ -6,16 +6,16 @@
 ## 📸 Application Preview
 
 ### Dashboard & Digital Twin
-![Dashboard](./screenshots/Dashboard.png)
+![Dashboard](assets/screenshots/Dashboard.png)
 
 ### AI-Powered Gemini Plate Scan
-![Gemini Plate Scan](./screenshots/platescan.png)
+![Gemini Plate Scan](assets/screenshots/platescan.png)
 
 ### AI Sustainability Advisor
-![AI Advisor](./screenshots/aiadvisor.png)
+![AI Advisor](assets/screenshots/aiadvisor.png)
 
 ### Activity Tracking & Carbon Logging
-![Track Log](./screenshots/Track.png)
+![Track Log](assets/screenshots/Track.png)
 
 
 
