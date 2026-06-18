@@ -14,7 +14,7 @@ const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
  * Falls back to static calculations in case of API failure or timeout.
  */
 export async function getGridCarbonIntensity(country = '', city = '') {
-  const normCountry = country.toLowerCase().trim();
+  const normCountry = (country || '').toLowerCase().trim();
   const now = Date.now();
 
   // Return cached live data if fresh
@@ -58,7 +58,7 @@ export async function getGridCarbonIntensity(country = '', city = '') {
     console.warn('[GRID API TIMEOUT/FAILURE] Falling back to static values. Error:', error.message);
     
     // Static location matching fallbacks
-    const normCity = city.toLowerCase().trim();
+    const normCity = (city || '').toLowerCase().trim();
     let intensity = EMISSION_FACTORS.energy.electricity_grid; // Default 0.23314
     let status = 'moderate';
     let region = country || 'Default Region';
@@ -97,8 +97,8 @@ export async function getGridCarbonIntensity(country = '', city = '') {
  * Compatibility wrapper to retrieve grid factors synchronously where async fetching is unavailable.
  */
 export function getGridFactors(country = '', city = '') {
-  const normCountry = country.toLowerCase().trim();
-  const normCity = city.toLowerCase().trim();
+  const normCountry = (country || '').toLowerCase().trim();
+  const normCity = (city || '').toLowerCase().trim();
 
   let electricity = EMISSION_FACTORS.energy.electricity_grid;
   let transitCarFactor = 1.0;

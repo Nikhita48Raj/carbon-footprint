@@ -57,6 +57,33 @@
       },
       "createdAt": "2026-06-16T17:25:45.819Z",
       "updatedAt": "2026-06-16T17:25:45.821Z"
+    },
+    {
+      "_id": "d3c925a0-2168-4518-aadd-8fbe9b759dbd",
+      "name": "Nikhita R S",
+      "email": "nikkida48msg@gmail.com",
+      "password": "$2b$10$.I/gyCwKd37j.X6PmWNCtuWNzP2IVRwIZicQv3vR1tEfSNnnhWzCy",
+      "profile": {
+        "onboardingComplete": true,
+        "location": "chennai",
+        "country": "india",
+        "householdSize": 3,
+        "diet": "avg_meat",
+        "transportMode": "car_petrol",
+        "energySource": "grid"
+      },
+      "baseline": {
+        "annualKgCO2e": 5420.2863,
+        "calculatedAt": "2026-06-16T20:30:20.941Z"
+      },
+      "gamification": {
+        "level": 1,
+        "streakDays": 0,
+        "totalPoints": 0,
+        "badges": []
+      },
+      "createdAt": "2026-06-16T20:30:06.555Z",
+      "updatedAt": "2026-06-16T20:30:20.943Z"
     }
   ],
   "activities": [

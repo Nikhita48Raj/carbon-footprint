@@ -42,14 +42,26 @@ global.fetch = mockFetch;
 
 describe('EcoTrack React Component & Interaction Tests', () => {
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
-    // Reset Zustand store to initial state
+    // Reset Zustand store to initial state and mock fetch actions to prevent background fetches
     useStore.setState({
       dashboardData: null,
+      dashboardLoading: false,
+      dashboardError: null,
       activities: [],
+      activitiesLoading: false,
       goals: [],
+      goalsLoading: false,
       toast: null,
+      fetchDashboard: jest.fn().mockResolvedValue(undefined),
+      fetchGoals: jest.fn().mockResolvedValue(undefined),
+      fetchActivities: jest.fn().mockResolvedValue(undefined),
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('Navigation Component', () => {
@@ -153,13 +165,6 @@ describe('EcoTrack React Component & Interaction Tests', () => {
 
   describe('Tracking Page & Logging Flows', () => {
     test('activity logging flow works correctly', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          activities: []
-        }),
-      });
-
       render(<Tracking />);
 
       // Fill form values
@@ -196,13 +201,6 @@ describe('EcoTrack React Component & Interaction Tests', () => {
     });
 
     test('computer vision plate scanner and file upload flow works', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({
-          activities: []
-        }),
-      });
-
       render(<Tracking />);
 
       const fileInput = screen.getByLabelText(/upload plate image/i);
@@ -272,7 +270,7 @@ describe('EcoTrack React Component & Interaction Tests', () => {
 
     test('submits new goal form values', async () => {
       useStore.setState({ goals: [] });
-      render(<Goals />);
+      const { container } = render(<Goals />);
 
       const toggleFormBtn = screen.getByRole('button', { name: /\+ new goal/i });
       fireEvent.click(toggleFormBtn);
@@ -281,10 +279,10 @@ describe('EcoTrack React Component & Interaction Tests', () => {
       const titleInput = screen.getByPlaceholderText(/reduce transport/i);
       fireEvent.change(titleInput, { target: { value: 'Eat vegan meals' } });
 
-      const amountInput = screen.getByPlaceholderText(/e\.g\./);
+      const amountInput = screen.getByPlaceholderText('e.g. 10');
       fireEvent.change(amountInput, { target: { value: '20' } });
 
-      const dateInput = screen.getByLabelText(/target date/i);
+      const dateInput = container.querySelector('input[type="date"]');
       fireEvent.change(dateInput, { target: { value: '2026-06-30' } });
 
       // Mock Goal API POST
