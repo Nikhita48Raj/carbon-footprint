@@ -1,6 +1,22 @@
 # 🌍 EcoTrack — Personal Climate Operating System
 
-> Transforming carbon tracking from a manual chore into an intelligent, AI-powered climate operating system.
+# 🌍 EcoTrack — Personal Climate Operating System
+
+> AI-powered carbon footprint tracking, climate intelligence, and sustainability coaching.
+
+## 📸 Application Preview
+
+### Dashboard & Digital Twin
+![Dashboard](assets/screenshots/Dashboard.png)
+
+### Gemini Vision Plate Scan
+![Gemini Plate Scan](assets/screenshots/GeminiPlateScan.png)
+
+### Sustainability Insights
+![Homepage](assets/screenshots/Homepage.png)
+
+### Smart Home Simulator
+![Smart Home](assets/screenshots/SmartHome.png)
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![React](https://img.shields.io/badge/React-19-blue)
