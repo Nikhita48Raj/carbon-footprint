@@ -7,7 +7,6 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-Database-green)
 ![Gemini](https://img.shields.io/badge/Gemini-AI-orange)
 ![Jest](https://img.shields.io/badge/Test_Coverage-98%25-success)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 ---
 
@@ -342,12 +341,6 @@ src/
 ## 👨‍💻 Team
 
 Built as a climate-tech platform focused on making carbon awareness actionable through AI, automation, and intuitive user experiences.
-
----
-
-## 📜 License
-
-MIT License
 
 ---
 
