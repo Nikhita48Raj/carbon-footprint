@@ -1,6 +1,7 @@
 # 🌍 EcoTrack — Personal Climate Operating System
 
 
+
 > AI-powered carbon footprint tracking, climate intelligence, and sustainability coaching.
 
 ## 📸 Application Preview
@@ -354,12 +355,6 @@ src/
 * Mobile application
 * Advanced AI forecasting
 * Community sustainability challenges
-
----
-
-## 👨‍💻 Team
-
-Built as a climate-tech platform focused on making carbon awareness actionable through AI, automation, and intuitive user experiences.
 
 ---
 
